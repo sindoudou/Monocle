@@ -3,7 +3,7 @@ package monocle.law
 import monocle._
 import monocle.internal.IsEq
 
-import scalaz.Id._
+import cats.Id
 
 class OptionalLaws[S, A](optional: Optional[S, A]) {
   import IsEq.syntax
@@ -21,7 +21,7 @@ class OptionalLaws[S, A](optional: Optional[S, A]) {
     optional.modify(identity)(s) <==> s
 
   def modifyFId(s: S): IsEq[S] =
-    optional.modifyF[Id](id.point[A](_))(s) <==> s
+    optional.modifyF[Id](Id.pure[A](_))(s) <==> s
 
   def modifyOptionIdentity(s: S): IsEq[Option[S]] =
     optional.modifyOption(identity)(s) <==> optional.getOption(s).map(_ => s)

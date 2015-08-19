@@ -1,6 +1,8 @@
 package monocle
 
-import scalaz.{Choice, Contravariant, Functor, Profunctor, \/}
+import cats.Functor
+import cats.functor.{Profunctor, Contravariant}
+import cats.data.Xor
 
 /**
  * A [[PSetter]] is a generalisation of Functor map:
@@ -32,8 +34,8 @@ abstract class PSetter[S, T, A, B] extends Serializable { self =>
   def set(b: B): S => T
 
   /** join two [[PSetter]] with the same target */
-  @inline final def sum[S1, T1](other: PSetter[S1, T1, A, B]): PSetter[S \/ S1, T \/ T1, A, B] =
-    PSetter[S \/ S1, T \/ T1, A, B](
+  final def sum[S1, T1](other: PSetter[S1, T1, A, B]): PSetter[S Xor S1, T Xor T1, A, B] =
+    PSetter[S Xor S1, T Xor T1, A, B](
       b => _.bimap(self.modify(b), other.modify(b))
     )
 
@@ -42,7 +44,7 @@ abstract class PSetter[S, T, A, B] extends Serializable { self =>
   /*************************************************************/
 
   /** compose a [[PSetter]] with a [[PSetter]] */
-  @inline final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
     new PSetter[S, T, C, D]{
       def modify(f: C => D): S => T =
         self.modify(other.modify(f))
@@ -52,23 +54,23 @@ abstract class PSetter[S, T, A, B] extends Serializable { self =>
     }
 
   /** compose a [[PSetter]] with a [[PTraversal]] */
-  @inline final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PSetter[S, T, C, D] =
     composeSetter(other.asSetter)
 
   /** compose a [[PSetter]] with a [[POptional]] */
-  @inline final def composeOptional[C, D](other: POptional[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeOptional[C, D](other: POptional[A, B, C, D]): PSetter[S, T, C, D] =
     composeSetter(other.asSetter)
 
   /** compose a [[PSetter]] with a [[PPrism]] */
-  @inline final def composePrism[C, D](other: PPrism[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composePrism[C, D](other: PPrism[A, B, C, D]): PSetter[S, T, C, D] =
     composeSetter(other.asSetter)
 
   /** compose a [[PSetter]] with a [[PLens]] */
-  @inline final def composeLens[C, D](other: PLens[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeLens[C, D](other: PLens[A, B, C, D]): PSetter[S, T, C, D] =
     composeSetter(other.asSetter)
 
   /** compose a [[PSetter]] with a [[PIso]] */
-  @inline final def composeIso[C, D](other: PIso[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeIso[C, D](other: PIso[A, B, C, D]): PSetter[S, T, C, D] =
     composeSetter(other.asSetter)
 
   /********************************************/
@@ -76,23 +78,23 @@ abstract class PSetter[S, T, A, B] extends Serializable { self =>
   /********************************************/
 
   /** alias to composeTraversal */
-  @inline final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PSetter[S, T, C, D] =
+  final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PSetter[S, T, C, D] =
     composeTraversal(other)
 
   /** alias to composeOptional */
-  @inline final def ^|-?[C, D](other: POptional[A, B, C, D]): PSetter[S, T, C, D] =
+  final def ^|-?[C, D](other: POptional[A, B, C, D]): PSetter[S, T, C, D] =
     composeOptional(other)
 
   /** alias to composePrism */
-  @inline final def ^<-?[C, D](other: PPrism[A, B, C, D]): PSetter[S, T, C, D] =
+  final def ^<-?[C, D](other: PPrism[A, B, C, D]): PSetter[S, T, C, D] =
     composePrism(other)
 
   /** alias to composeLens */
-  @inline final def ^|->[C, D](other: PLens[A, B, C, D]): PSetter[S, T, C, D] =
+  final def ^|->[C, D](other: PLens[A, B, C, D]): PSetter[S, T, C, D] =
     composeLens(other)
 
   /** alias to composeIso */
-  @inline final def ^<->[C, D](other: PIso[A, B, C, D]): PSetter[S, T, C, D] =
+  final def ^<->[C, D](other: PIso[A, B, C, D]): PSetter[S, T, C, D] =
     composeIso(other)
 
 }
@@ -101,8 +103,8 @@ object PSetter extends SetterInstances {
   def id[S, T]: PSetter[S, T, S, T] =
     PIso.id[S, T].asSetter
 
-  def codiagonal[S, T]: PSetter[S \/ S, T \/ T, S, T] =
-    PSetter[S \/ S, T \/ T, S, T](f => _.bimap(f,f))
+  def codiagonal[S, T]: PSetter[S Xor S, T Xor T, S, T] =
+    PSetter[S Xor S, T Xor T, S, T](f => _.bimap(f,f))
 
   /** create a [[PSetter]] using modify function */
   def apply[S, T, A, B](_modify: (A => B) => S => T): PSetter[S, T, A, B] =
@@ -124,7 +126,7 @@ object PSetter extends SetterInstances {
 
   /** create a [[PSetter]] from a Profunctor */
   def fromProfunctor[P[_, _], A, B, C](implicit P: Profunctor[P]): PSetter[P[B, C], P[A, C], A, B] =
-    PSetter[P[B, C], P[A, C], A, B](f => P.mapfst(_)(f))
+    PSetter[P[B, C], P[A, C], A, B](f => P.lmap(_)(f))
 
 }
 
@@ -132,7 +134,7 @@ object Setter {
   def id[A]: Setter[A, A] =
     Iso.id[A].asSetter
 
-  def codiagonal[S]: Setter[S \/ S, S] =
+  def codiagonal[S]: Setter[S Xor S, S] =
     PSetter.codiagonal
 
   /** [[Setter]] that points to nothing */
@@ -152,7 +154,7 @@ sealed abstract class SetterInstances {
     def id[A]: Setter[A, A] =
       Setter.id
 
-    def choice[A, B, C](f1: => Setter[A, C], f2: => Setter[B, C]): Setter[A \/ B, C] =
+    def choice[A, B, C](f1: => Setter[A, C], f2: => Setter[B, C]): Setter[A Xor B, C] =
       f1 sum f2
   }
 }

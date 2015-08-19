@@ -1,6 +1,8 @@
 package monocle
 
-import scalaz.{Arrow, Choice, Monoid, \/}
+import cats.Monoid
+import cats.data.Xor
+import cats.arrow.Arrow
 
 /**
  * A [[Getter]] can be seen as a glorified get method between
@@ -16,8 +18,8 @@ abstract class Getter[S, A] extends Serializable { self =>
   def get(s: S): A
 
   /** join two [[Getter]] with the same target */
-  @inline final def sum[S1](other: Getter[S1, A]): Getter[S \/ S1, A] =
-    Getter[S \/ S1, A](_.fold(self.get, other.get))
+  @inline final def sum[S1](other: Getter[S1, A]): Getter[S Xor S1, A] =
+    Getter[S Xor S1, A](_.fold(self.get, other.get))
 
   /** pair two disjoint [[Getter]] */
   @inline final def product[S1, A1](other: Getter[S1, A1]): Getter[(S, S1), (A, A1)] =
@@ -104,8 +106,8 @@ object Getter extends GetterInstances {
   def id[A]: Getter[A, A] =
     Iso.id[A].asGetter
   
-  def codiagonal[A]: Getter[A \/ A, A] =
-    Getter[A \/ A, A](_.fold(identity, identity))
+  def codiagonal[A]: Getter[A Xor A, A] =
+    Getter[A Xor A, A](_.fold(identity, identity))
 
   def apply[S, A](_get: S => A): Getter[S, A] =
     new Getter[S, A]{
@@ -116,7 +118,7 @@ object Getter extends GetterInstances {
 
 sealed abstract class GetterInstances extends GetterInstances0 {
   implicit val getterArrow: Arrow[Getter] = new Arrow[Getter]{
-    def arr[A, B](f: (A) => B): Getter[A, B] =
+    def lift[A, B](f: (A) => B): Getter[A, B] =
       Getter(f)
 
     def first[A, B, C](f: Getter[A, B]): Getter[(A, C), (B, C)] =
@@ -135,7 +137,7 @@ sealed abstract class GetterInstances extends GetterInstances0 {
 
 sealed abstract class GetterInstances0 {
   implicit val getterChoice: Choice[Getter] = new Choice[Getter]{
-    def choice[A, B, C](f: => Getter[A, C], g: => Getter[B, C]): Getter[A \/ B, C] =
+    def choice[A, B, C](f: => Getter[A, C], g: => Getter[B, C]): Getter[A Xor B, C] =
       f sum g
 
     def id[A]: Getter[A, A] =

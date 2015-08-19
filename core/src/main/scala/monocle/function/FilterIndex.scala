@@ -3,8 +3,8 @@ package monocle.function
 import monocle.Traversal
 
 import scala.annotation.implicitNotFound
-import scalaz.syntax.traverse._
-import scalaz.{Applicative, Traverse}
+import cats.syntax.traverse._
+import cats.{Applicative, Traverse}
 
 @implicitNotFound("Could not find an instance of FilterIndex[${S},${I},${A}], please check Monocle instance location policy to " +
   "find out which import is necessary")
@@ -26,7 +26,7 @@ trait FilterIndexFunctions {
   def traverseFilterIndex[S[_]: Traverse, A](zipWithIndex: S[A] => S[(A, Int)]): FilterIndex[S[A], Int, A] = new FilterIndex[S[A], Int, A]{
     def filterIndex(predicate: Int => Boolean) = new Traversal[S[A], A] {
       def modifyF[F[_]: Applicative](f: A => F[A])(s: S[A]): F[S[A]] =
-        zipWithIndex(s).traverse { case (a, j) => if(predicate(j)) f(a) else Applicative[F].point(a) }
+        zipWithIndex(s).traverse { case (a, j) => if(predicate(j)) f(a) else Applicative[F].pure(a) }
     }
   }
 

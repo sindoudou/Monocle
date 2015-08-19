@@ -3,8 +3,6 @@ package monocle.internal
 import monocle.Optional
 import monocle.function.Index
 
-import scalaz.Maybe
-
 
 private[monocle] trait Bits[A] {
 

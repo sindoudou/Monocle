@@ -3,7 +3,7 @@ package monocle.law
 import monocle.Prism
 import monocle.internal.IsEq
 
-import scalaz.Id._
+import cats.Id
 
 class PrismLaws[S, A](prism: Prism[S, A]) {
   import IsEq.syntax
@@ -18,7 +18,7 @@ class PrismLaws[S, A](prism: Prism[S, A]) {
     prism.modify(identity)(s) <==> s
 
   def modifyFId(s: S): IsEq[S] =
-    prism.modifyF[Id](id.point[A](_))(s) <==> s
+    prism.modifyF[Id](Id.pure[A](_))(s) <==> s
   
   def modifyOptionIdentity(s: S): IsEq[Option[S]] =
     prism.modifyOption(identity)(s) <==> prism.getOption(s).map(_ => s)

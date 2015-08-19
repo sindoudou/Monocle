@@ -3,10 +3,10 @@ package monocle.std
 import monocle.function._
 import monocle.{Optional, Prism}
 
-import scalaz.Id.Id
-import scalaz.\/
-import scalaz.std.vector._
-import scalaz.syntax.traverse._
+import cats.Id
+import cats.data.Xor
+import cats.std.vector._
+import cats.syntax.traverse._
 
 object vector extends VectorOptics
 
@@ -20,7 +20,7 @@ trait VectorOptics {
 
   implicit def vectorIndex[A]: Index[Vector[A], Int, A] = new Index[Vector[A], Int, A] {
     def index(i: Int) = Optional[Vector[A], A](
-      v      => if(i < 0) None else \/.fromTryCatchNonFatal(v.apply(i)).toOption)(
+      v      => if(i < 0) None else Xor.fromTryCatchNonFatal(v.apply(i)).toOption)(
       a => v => v.zipWithIndex.traverse[Id, A]{
         case (_    , index) if index == i => a
         case (value, index)               => value

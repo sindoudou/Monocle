@@ -33,6 +33,7 @@ lazy val buildSettings = Seq(
   scmInfo := Some(ScmInfo(url("https://github.com/julien-truffaut/Monocle"), "scm:git:git@github.com:julien-truffaut/Monocle.git"))
 )
 
+lazy val cats       = "org.spire-math"  %% "cats-core"   % "0.1.3-SNAPSHOT"
 lazy val scalaz     = "org.scalaz"      %% "scalaz-core" % "7.1.3"
 lazy val shapeless  = "com.chuusai"     %% "shapeless"   % "2.2.5"
 
@@ -52,21 +53,26 @@ lazy val monocleSettings = buildSettings ++ publishSettings
 lazy val monocle = project.in(file("."))
   .settings(moduleName := "monocle")
   .settings(monocleSettings)
-  .aggregate(core, generic, law, macros, state, test, example, docs, bench)
-  .dependsOn(core, generic, law, macros, state, test % "test-internal -> test", bench % "compile-internal;test-internal -> test")
+  .aggregate(core, generic, law, macros, `scalaz-support`, state, test, example, docs, bench)
+  .dependsOn(core, generic, law, macros, `scalaz-support`, state, test % "test-internal -> test", bench % "compile-internal;test-internal -> test")
 
 
 lazy val core = project
   .settings(moduleName := "monocle-core")
   .settings(monocleSettings)
   .settings(mimaSettings("core"))
-  .settings(libraryDependencies := Seq(scalaz, compilerPlugin(kindProjector)))
+  .settings(libraryDependencies := Seq(cats, compilerPlugin(kindProjector)))
 
 lazy val generic = project.dependsOn(core)
   .settings(moduleName := "monocle-generic")
   .settings(monocleSettings)
   .settings(mimaSettings("generic"))
   .settings(libraryDependencies := Seq(scalaz, shapeless))
+
+lazy val `scalaz-support` = project.dependsOn(core)
+  .settings(moduleName := "monocle-scalaz")
+  .settings(monocleSettings)
+  .settings(libraryDependencies := Seq(scalaz, compilerPlugin(kindProjector)))
 
 lazy val law = project.dependsOn(core)
   .settings(moduleName := "monocle-law")

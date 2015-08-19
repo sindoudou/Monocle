@@ -1,11 +1,12 @@
 package monocle
 
-import scalaz.{Applicative, Category, Equal, Maybe, Monoid, \/}
-import scalaz.syntax.std.option._
+import cats.{Applicative, Eq, Monoid}
+import cats.arrow.Category
+import cats.data.Xor
 
 /**
  * A [[PPrism]] can be seen as a pair of functions:
- *  - `getOrModify: S => T \/ A`
+ *  - `getOrModify: S => T Xor A`
  *  - `reverseGet : B => T`
  *
  * A [[PPrism]] could also be defined as a weaker [[PIso]] where get can fail.
@@ -32,7 +33,7 @@ import scalaz.syntax.std.option._
 abstract class PPrism[S, T, A, B] extends Serializable { self =>
 
   /** get the target of a [[PPrism]] or modify the source in case there is no target */
-  def getOrModify(s: S): T \/ A
+  def getOrModify(s: S): T Xor A
 
   /** get the modified source of a [[PPrism]] */
   def reverseGet(b: B): T
@@ -43,7 +44,7 @@ abstract class PPrism[S, T, A, B] extends Serializable { self =>
   /** modify polymorphically the target of a [[PPrism]] with an Applicative function */
   @inline final def modifyF[F[_] : Applicative](f: A => F[B])(s: S): F[T] =
     getOrModify(s).fold(
-      t => Applicative[F].point(t),
+      t => Applicative[F].pure(t),
       a => Applicative[F].map(f(a))(reverseGet)
     )
 
@@ -91,18 +92,6 @@ abstract class PPrism[S, T, A, B] extends Serializable { self =>
       case (c, b) => (c, reverseGet(b))
     }
 
-  @deprecated("use getOption", since = "1.1.0")
-  @inline final def getMaybe(s: S): Maybe[A] =
-    getOption(s).toMaybe
-
-  @deprecated("use modifyOption", since = "1.1.0")
-  @inline final def modifyMaybe(f: A => B): S => Maybe[T] =
-    s => modifyOption(f)(s).toMaybe
-
-  @deprecated("use setOption", since = "1.1.0")
-  @inline final def setMaybe(b: B): S => Maybe[T] =
-    s => setOption(b)(s).toMaybe
-
   /************************************************************/
   /** Compose methods between a [[PPrism]] and another Optics */
   /************************************************************/
@@ -134,7 +123,7 @@ abstract class PPrism[S, T, A, B] extends Serializable { self =>
   /** compose a [[PPrism]] with a [[PPrism]] */
   @inline final def composePrism[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] =
     new PPrism[S, T, C, D]{
-      def getOrModify(s: S): T \/ C =
+      def getOrModify(s: S): T Xor C =
         self.getOrModify(s).flatMap(a => other.getOrModify(a).bimap(self.set(_)(s), identity))
 
       def reverseGet(d: D): T =
@@ -179,7 +168,7 @@ abstract class PPrism[S, T, A, B] extends Serializable { self =>
   /** view a [[PPrism]] as a [[Fold]] */
   @inline final def asFold: Fold[S, A] = new Fold[S, A]{
     def foldMap[M: Monoid](f: A => M)(s: S): M =
-      getOption(s) map f getOrElse Monoid[M].zero
+      getOption(s) map f getOrElse Monoid[M].empty
   }
 
   /** view a [[PPrism]] as a [[Setter]] */
@@ -202,7 +191,7 @@ abstract class PPrism[S, T, A, B] extends Serializable { self =>
   /** view a [[PPrism]] as a [[POptional]] */
   @inline final def asOptional: POptional[S, T, A, B] =
     new POptional[S, T, A, B]{
-      def getOrModify(s: S): T \/ A =
+      def getOrModify(s: S): T Xor A =
         self.getOrModify(s)
 
       def set(b: B): S => T =
@@ -224,9 +213,9 @@ object PPrism extends PrismInstances {
     PIso.id[S, T].asPrism
 
   /** create a [[PPrism]] using the canonical functions: getOrModify and reverseGet */
-  def apply[S, T, A, B](_getOrModify: S => T \/ A)(_reverseGet: B => T): PPrism[S, T, A, B] =
+  def apply[S, T, A, B](_getOrModify: S => T Xor A)(_reverseGet: B => T): PPrism[S, T, A, B] =
     new PPrism[S, T, A, B]{
-      def getOrModify(s: S): T \/ A =
+      def getOrModify(s: S): T Xor A =
         _getOrModify(s)
 
       def reverseGet(b: B): T =
@@ -244,8 +233,8 @@ object Prism {
   /** alias for [[PPrism]] apply restricted to monomorphic update */
   def apply[S, A](_getOption: S => Option[A])(_reverseGet: A => S): Prism[S, A] =
     new Prism[S, A]{
-      def getOrModify(s: S): S \/ A =
-        _getOption(s).fold[S \/ A](\/.left(s))(\/.right)
+      def getOrModify(s: S): S Xor A =
+        _getOption(s).fold[S Xor A](Xor.left(s))(Xor.right)
 
       def reverseGet(b: A): S =
         _reverseGet(b)
@@ -255,8 +244,8 @@ object Prism {
     }
 
   /** a [[Prism]] that checks for equality with a given value */
-  def only[A](a: A)(implicit A: Equal[A]): Prism[A, Unit] =
-    Prism[A, Unit](a2 => if(A.equal(a, a2)) Some(()) else None)(_ => a)
+  def only[A](a: A)(implicit A: Eq[A]): Prism[A, Unit] =
+    Prism[A, Unit](a2 => if(A.eqv(a, a2)) Some(()) else None)(_ => a)
 }
 
 sealed abstract class PrismInstances {

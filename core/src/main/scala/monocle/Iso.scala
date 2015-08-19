@@ -1,7 +1,8 @@
 package monocle
 
-import scalaz.Isomorphism.{<=>, <~>}
-import scalaz.{Applicative, Category, Functor, Maybe, Monoid, Split, \/}
+import cats.{Applicative, Functor, Monoid}
+import cats.arrow.{Category, Split}
+import cats.data.Xor
 
 /**
  * A [[PIso]] defines an isomorphism between types S, A and B, T:
@@ -51,33 +52,33 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
   def reverse: PIso[B, A, T, S]
 
   /** modify polymorphically the target of a [[PIso]] with a Functor function */
-  @inline final def modifyF[F[_]: Functor](f: A => F[B])(s: S): F[T] =
+  final def modifyF[F[_]: Functor](f: A => F[B])(s: S): F[T] =
     Functor[F].map(f(get(s)))(reverseGet)
 
   /** modify polymorphically the target of a [[PIso]] with a function */
-  @inline final def modify(f: A => B): S => T =
+  final def modify(f: A => B): S => T =
     s => reverseGet(f(get(s)))
 
   /** set polymorphically the target of a [[PIso]] with a value */
-  @inline final def set(b: B): S => T =
+  final def set(b: B): S => T =
     _ => reverseGet(b)
 
   /** pair two disjoint [[PIso]] */
-  @inline final def product[S1, T1, A1, B1](other: PIso[S1, T1, A1, B1]): PIso[(S, S1), (T, T1), (A, A1), (B, B1)] =
+  final def product[S1, T1, A1, B1](other: PIso[S1, T1, A1, B1]): PIso[(S, S1), (T, T1), (A, A1), (B, B1)] =
     PIso[(S, S1), (T, T1), (A, A1), (B, B1)]{
       case (s, s1) => (get(s), other.get(s1))
     }{
       case (b, b1) => (reverseGet(b), other.reverseGet(b1))
     }
 
-  @inline final def first[C]: PIso[(S, C), (T, C), (A, C), (B, C)] =
+  final def first[C]: PIso[(S, C), (T, C), (A, C), (B, C)] =
     PIso[(S, C), (T, C), (A, C), (B, C)]{
       case (s, c) => (get(s), c)
     }{
       case (b, c) => (reverseGet(b), c)
     }
 
-  @inline final def second[C]: PIso[(C, S), (C, T), (C, A), (C, B)] =
+  final def second[C]: PIso[(C, S), (C, T), (C, A), (C, B)] =
     PIso[(C, S), (C, T), (C, A), (C, B)]{
       case (c, s) => (c, get(s))
     }{
@@ -89,35 +90,35 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
   /**********************************************************/
 
   /** compose a [[PIso]] with a [[Fold]] */
-  @inline final def composeFold[C](other: Fold[A, C]): Fold[S, C] =
+  final def composeFold[C](other: Fold[A, C]): Fold[S, C] =
     asFold composeFold other
 
   /** compose a [[PIso]] with a [[Getter]] */
-  @inline final def composeGetter[C](other: Getter[A, C]): Getter[S, C] =
+  final def composeGetter[C](other: Getter[A, C]): Getter[S, C] =
     asGetter composeGetter other
 
   /** compose a [[PIso]] with a [[PSetter]] */
-  @inline final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
     asSetter composeSetter other
 
   /** compose a [[PIso]] with a [[PTraversal]] */
-  @inline final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
+  final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
     asTraversal composeTraversal other
 
   /** compose a [[PIso]] with a [[POptional]] */
-  @inline final def composeOptional[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
+  final def composeOptional[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
     asOptional composeOptional other
 
   /** compose a [[PIso]] with a [[PPrism]] */
-  @inline final def composePrism[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] =
+  final def composePrism[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] =
     asPrism composePrism other
 
   /** compose a [[PIso]] with a [[PLens]] */
-  @inline final def composeLens[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
+  final def composeLens[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
     asLens composeLens other
 
   /** compose a [[PIso]] with a [[PIso]] */
-  @inline final def composeIso[C, D](other: PIso[A, B, C, D]): PIso[S, T, C, D] =
+  final def composeIso[C, D](other: PIso[A, B, C, D]): PIso[S, T, C, D] =
     new PIso[S, T, C, D]{ composeSelf =>
       def get(s: S): C =
         other.get(self.get(s))
@@ -143,23 +144,23 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
   /********************************************/
 
   /** alias to composeTraversal */
-  @inline final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
+  final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
     composeTraversal(other)
 
   /** alias to composeOptional */
-  @inline final def ^|-?[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
+  final def ^|-?[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
     composeOptional(other)
 
   /** alias to composePrism */
-  @inline final def ^<-?[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] =
+  final def ^<-?[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] =
     composePrism(other)
 
   /** alias to composeLens */
-  @inline final def ^|->[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
+  final def ^|->[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
     composeLens(other)
 
   /** alias to composeIso */
-  @inline final def ^<->[C, D](other: PIso[A, B, C, D]): PIso[S, T, C, D] =
+  final def ^<->[C, D](other: PIso[A, B, C, D]): PIso[S, T, C, D] =
     composeIso(other)
 
   /****************************************************************/
@@ -167,21 +168,21 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
   /****************************************************************/
 
   /** view a [[PIso]] as a [[Fold]] */
-  @inline final def asFold: Fold[S, A] =
+  final def asFold: Fold[S, A] =
     new Fold[S, A]{
       def foldMap[M: Monoid](f: A => M)(s: S): M =
         f(get(s))
     }
 
   /** view a [[PIso]] as a [[Getter]] */
-  @inline final def asGetter: Getter[S, A] =
+  final def asGetter: Getter[S, A] =
     new Getter[S, A]{
       def get(s: S): A =
         self.get(s)
     }
 
   /** view a [[PIso]] as a [[Setter]] */
-  @inline final def asSetter: PSetter[S, T, A, B] =
+  final def asSetter: PSetter[S, T, A, B] =
     new PSetter[S, T, A, B]{
       def modify(f: A => B): S => T =
         self.modify(f)
@@ -191,17 +192,17 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
     }
 
   /** view a [[PIso]] as a [[PTraversal]] */
-  @inline final def asTraversal: PTraversal[S, T, A, B] =
+  final def asTraversal: PTraversal[S, T, A, B] =
     new PTraversal[S, T, A, B] {
       def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T] =
         self.modifyF(f)(s)
     }
 
   /** view a [[PIso]] as a [[POptional]] */
-  @inline final def asOptional: POptional[S, T, A, B] =
+  final def asOptional: POptional[S, T, A, B] =
     new POptional[S, T, A, B]{
-      def getOrModify(s: S): T \/ A =
-        \/.right(get(s))
+      def getOrModify(s: S): T Xor A =
+        Xor.right(get(s))
 
       def set(b: B): S => T =
         self.set(b)
@@ -217,10 +218,10 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
     }
 
   /** view a [[PIso]] as a [[PPrism]] */
-  @inline final def asPrism: PPrism[S, T, A, B] =
+  final def asPrism: PPrism[S, T, A, B] =
     new PPrism[S, T, A, B]{
-      def getOrModify(s: S): T \/ A =
-        \/.right(get(s))
+      def getOrModify(s: S): T Xor A =
+        Xor.right(get(s))
 
       def reverseGet(b: B): T =
         self.reverseGet(b)
@@ -230,7 +231,7 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
     }
 
   /** view a [[PIso]] as a [[PLens]] */
-  @inline final def asLens: PLens[S, T, A, B] =
+  final def asLens: PLens[S, T, A, B] =
     new PLens[S, T, A, B]{
       def get(s: S): A =
         self.get(s)
@@ -287,10 +288,6 @@ object PIso extends IsoInstances {
           def reverse: PIso[S, T, S, T] = self
         }
     }
-
-  /** transform a natural transformation in a [[PIso]] */
-  def fromIsoFunctor[F[_], G[_], A, B](isoFunctor: F <~> G): PIso[F[A], F[B], G[A], G[B]] =
-    PIso(isoFunctor.to.apply[A])(isoFunctor.from.apply[B])
 }
 
 object Iso {
@@ -301,10 +298,6 @@ object Iso {
   /** alias for [[PIso]] id when S = T and A = B */
   def id[S]: Iso[S, S] =
     PIso.id[S, S]
-
-  /** transform an Iso in a [[Iso]] */
-  def fromIsoSet[A, B](isoSet: A <=> B): Iso[A, B] =
-    Iso(isoSet.to)(isoSet.from)
 }
 
 sealed abstract class IsoInstances extends IsoInstances0 {
