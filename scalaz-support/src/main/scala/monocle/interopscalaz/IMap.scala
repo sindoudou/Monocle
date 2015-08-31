@@ -1,35 +1,37 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.Applicative
 import monocle.function._
 import monocle.{Lens, Prism, Traversal}
 
-import scalaz.std.list._
-import scalaz.syntax.traverse._
-import scalaz.{==>>, Applicative, Order}
+import cats.std.list._
+import cats.syntax.traverse._
+import cats.syntax.functor._
+import scalaz.{Traverse, IMap, Order}
 
 object imap extends IMapOptics
 
 trait IMapOptics {
 
-  implicit def iMapEmpty[K, V]: Empty[K ==>> V] = new Empty[K ==>> V] {
-    def empty = Prism[K ==>> V, Unit](m => if(m.isEmpty) Some(()) else None)(_ => ==>>.empty)
+  implicit def iMapEmpty[K, V]: Empty[IMap[K, V]] = new Empty[IMap[K, V]] {
+    def empty = Prism[K IMap V, Unit](m => if(m.isEmpty) Some(()) else None)(_ => IMap.empty)
   }
 
-  implicit def atIMap[K: Order, V]: At[K ==>> V, K, V] = new At[K ==>> V, K, V]{
-    def at(i: K) = Lens{m: ==>>[K, V] => m.lookup(i)}(optV => map => optV.fold(map - i)(v => map + (i -> v)))
+  implicit def atIMap[K: Order, V]: At[IMap[K, V], K, V] = new At[IMap[K, V], K, V]{
+    def at(i: K) = Lens{m: IMap[K, V] => m.lookup(i)}(optV => map => optV.fold(map - i)(v => map + (i -> v)))
   }
 
-  implicit def iMapEach[K, V]: Each[K ==>> V, V] = Each.traverseEach[==>>[K, ?], V]
+  implicit def iMapEach[K, V]: Each[IMap[K, V], V] =
+    Each.traverseEach[IMap[K, ?], V](typeclass.traverse[IMap[K, ?]].get(IMap.mapCovariant[K]))
 
-  implicit def iMapIndex[K: Order, V]: Index[K ==>> V, K, V] = Index.atIndex
+  implicit def iMapIndex[K: Order, V]: Index[IMap[K, V], K, V] = Index.atIndex
 
-  implicit def iMapFilterIndex[K: Order, V]: FilterIndex[K ==>> V, K, V] = new FilterIndex[K ==>> V, K, V] {
-    import scalaz.syntax.applicative._
-    def filterIndex(predicate: K => Boolean) = new Traversal[K ==>> V, V] {
-      def modifyF[F[_]: Applicative](f: V => F[V])(s: K ==>> V): F[K ==>> V] =
+  implicit def iMapFilterIndex[K: Order, V]: FilterIndex[IMap[K, V], K, V] = new FilterIndex[IMap[K, V], K, V] {
+    def filterIndex(predicate: K => Boolean) = new Traversal[IMap[K, V], V] {
+      def modifyF[F[_]](f: V => F[V])(s: IMap[K, V])(implicit F: Applicative[F]): F[IMap[K, V]] =
         s.toList.traverse{ case (k, v) =>
-          (if(predicate(k)) f(v) else v.point[F]).strengthL(k)
-        }.map(==>>.fromList(_))
+          (if(predicate(k)) f(v) else F.pure(v)).map(k -> _)
+        }.map(IMap.fromList(_))
     }
   }
 

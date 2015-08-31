@@ -1,10 +1,13 @@
 package monocle
 
+import cats.Eq
+import cats.arrow.{Category, Choice, Compose}
+import cats.data.Xor
+import cats.std.list._
+import cats.std.int._
 import monocle.law.discipline.{SetterTests, TraversalTests}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
-
-import scalaz._
 
 class TraversalSpec extends MonocleSuite {
 
@@ -15,7 +18,7 @@ class TraversalSpec extends MonocleSuite {
       oldLoc.copy(latitude = newLat, longitude = newLong)
   }
 
-  def all[A]: Traversal[IList[A], A] = PTraversal.fromTraverse[IList, A, A]
+  def all[A]: Traversal[List[A], A] = PTraversal.fromTraverse[List, A, A]
 
   implicit val locationGen: Arbitrary[Location] = Arbitrary(for {
     x <- arbitrary[Int]
@@ -23,7 +26,7 @@ class TraversalSpec extends MonocleSuite {
     n <- arbitrary[String]
   } yield Location(x, y, n))
 
-  implicit val exampleEq = Equal.equalA[Location]
+  implicit val exampleEq = Eq.fromUniversalEquals[Location]
 
 
   checkAll("apply2 Traversal", TraversalTests(coordinates))
@@ -35,7 +38,7 @@ class TraversalSpec extends MonocleSuite {
 
   test("Traversal has a Compose instance") {
     Compose[Traversal].compose(coordinates, all[Location])
-      .modify(_ + 1)(IList(Location(1,2,""), Location(3,4,""))) shouldEqual IList(Location(2,3,""), Location(4,5,""))
+      .modify(_ + 1)(List(Location(1,2,""), Location(3,4,""))) shouldEqual List(Location(2,3,""), Location(4,5,""))
   }
 
   test("Traversal has a Category instance") {
@@ -43,7 +46,7 @@ class TraversalSpec extends MonocleSuite {
   }
 
   test("Traversal has a Choice instance") {
-    Choice[Traversal].choice(all[Int], coordinates).modify(_ + 1)(-\/(IList(1,2,3))) shouldEqual -\/(IList(2,3,4))
+    Choice[Traversal].choice(all[Int], coordinates).modify(_ + 1)(Xor.left(List(1,2,3))) shouldEqual Xor.left(List(2,3,4))
   }
 
 }

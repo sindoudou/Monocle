@@ -1,9 +1,7 @@
 package monocle.syntax
 
+import cats.Monoid
 import monocle._
-
-import scalaz.{Maybe, IList, Monoid}
-import scalaz.syntax.std.option._
 
 object apply extends ApplySyntax
 
@@ -27,9 +25,9 @@ final case class ApplyGetterOps[S](s: S) {
 }
 
 final case class ApplyIsoOps[S](s: S) {
-  @inline def applyIso[T, A, B](iso: PIso[S, T, A, B]): ApplyIso[S, T, A, B] = ApplyIso[S, T, A, B](s, iso)
+  def applyIso[T, A, B](iso: PIso[S, T, A, B]): ApplyIso[S, T, A, B] = ApplyIso[S, T, A, B](s, iso)
   /** alias to applyIso */
-  @inline def &<->[T, A, B](iso: PIso[S, T, A, B]): ApplyIso[S, T, A, B] = applyIso(iso)
+  def &<->[T, A, B](iso: PIso[S, T, A, B]): ApplyIso[S, T, A, B] = applyIso(iso)
 }
 
 final case class ApplyLensOps[S](s: S) {
@@ -62,222 +60,205 @@ final case class ApplyTraversalOps[S](s: S) {
 
 
 case class ApplyFold[S, A](s: S, _fold: Fold[S, A]) {
-  @inline def foldMap[M: Monoid](f: A => M): M = _fold.foldMap(f)(s)
+  def foldMap[M: Monoid](f: A => M): M = _fold.foldMap(f)(s)
 
-  @inline def getAll: List[A] = _fold.getAll(s)
-  @inline def headOption: Option[A] = _fold.headOption(s)
+  def getAll: List[A] = _fold.getAll(s)
+  def headOption: Option[A] = _fold.headOption(s)
 
-  @inline def exist(p: A => Boolean): Boolean = _fold.exist(p)(s)
-  @inline def all(p: A => Boolean): Boolean = _fold.all(p)(s)
+  def exist(p: A => Boolean): Boolean = _fold.exist(p)(s)
+  def all(p: A => Boolean): Boolean = _fold.all(p)(s)
 
-  @deprecated("use headOption", since = "1.1.0")
-  @inline def headMaybe: Maybe[A] = _fold.headOption(s).toMaybe
-
-  @inline def composeFold[B](other: Fold[A, B]): ApplyFold[S, B] = ApplyFold(s, _fold composeFold other)
-  @inline def composeGetter[B](other: Getter[A, B]): ApplyFold[S, B] = ApplyFold(s, _fold composeGetter other)
-  @inline def composeTraversal[B, C, D](other: PTraversal[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeTraversal other)
-  @inline def composeOptional[B, C, D](other: POptional[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeOptional other)
-  @inline def composePrism[B, C, D](other: PPrism[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composePrism other)
-  @inline def composeLens[B, C, D](other: PLens[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeLens other)
-  @inline def composeIso[B, C, D](other: PIso[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeIso other)
+  def composeFold[B](other: Fold[A, B]): ApplyFold[S, B] = ApplyFold(s, _fold composeFold other)
+  def composeGetter[B](other: Getter[A, B]): ApplyFold[S, B] = ApplyFold(s, _fold composeGetter other)
+  def composeTraversal[B, C, D](other: PTraversal[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeTraversal other)
+  def composeOptional[B, C, D](other: POptional[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeOptional other)
+  def composePrism[B, C, D](other: PPrism[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composePrism other)
+  def composeLens[B, C, D](other: PLens[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeLens other)
+  def composeIso[B, C, D](other: PIso[A, B, C, D]): ApplyFold[S, C] = ApplyFold(s, _fold composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[B, C, D](other: PTraversal[A, B, C, D]): ApplyFold[S, C] = composeTraversal(other)
+  def ^|->>[B, C, D](other: PTraversal[A, B, C, D]): ApplyFold[S, C] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[B, C, D](other: POptional[A, B, C, D]): ApplyFold[S, C] = composeOptional(other)
+  def ^|-?[B, C, D](other: POptional[A, B, C, D]): ApplyFold[S, C] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[B, C, D](other: PPrism[A, B, C, D]): ApplyFold[S, C] = composePrism(other)
+  def ^<-?[B, C, D](other: PPrism[A, B, C, D]): ApplyFold[S, C] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[B, C, D](other: PLens[A, B, C, D]): ApplyFold[S, C] = composeLens(other)
+  def ^|->[B, C, D](other: PLens[A, B, C, D]): ApplyFold[S, C] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[B, C, D](other: PIso[A, B, C, D]): ApplyFold[S, C] = composeIso(other)
+  def ^<->[B, C, D](other: PIso[A, B, C, D]): ApplyFold[S, C] = composeIso(other)
 }
 
 final case class ApplyGetter[S, A](s: S, getter: Getter[S, A]){
-  @inline def get: A = getter.get(s)
+  def get: A = getter.get(s)
 
-  @inline def composeFold[B](other: Fold[A, B]): ApplyFold[S, B] = ApplyFold(s, getter composeFold other)
-  @inline def composeGetter[B](other: Getter[A, B]): ApplyGetter[S, B] = ApplyGetter(s, getter composeGetter other)
-  @inline def composeLens[B, C, D](other: PLens[A, B, C, D]): ApplyGetter[S, C] = ApplyGetter(s, getter composeLens other)
-  @inline def composeIso[B, C, D](other: PIso[A, B, C, D]): ApplyGetter[S, C] = ApplyGetter(s, getter composeIso other)
+  def composeFold[B](other: Fold[A, B]): ApplyFold[S, B] = ApplyFold(s, getter composeFold other)
+  def composeGetter[B](other: Getter[A, B]): ApplyGetter[S, B] = ApplyGetter(s, getter composeGetter other)
+  def composeLens[B, C, D](other: PLens[A, B, C, D]): ApplyGetter[S, C] = ApplyGetter(s, getter composeLens other)
+  def composeIso[B, C, D](other: PIso[A, B, C, D]): ApplyGetter[S, C] = ApplyGetter(s, getter composeIso other)
 
   /** alias to composeLens */
-  @inline def ^|->[B, C, D](other: PLens[A, B, C, D]): ApplyGetter[S, C] = composeLens(other)
+  def ^|->[B, C, D](other: PLens[A, B, C, D]): ApplyGetter[S, C] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[B, C, D](other: PIso[A, B, C, D]): ApplyGetter[S, C] = composeIso(other)
+  def ^<->[B, C, D](other: PIso[A, B, C, D]): ApplyGetter[S, C] = composeIso(other)
 }
 
 final case class ApplyIso[S, T, A, B](s: S, iso: PIso[S, T, A, B]) {
-  @inline def get: A = iso.get(s)
-  @inline def set(b: B): T = iso.set(b)(s)
-  @inline def modify(f: A => B): T = iso.modify(f)(s)
+  def get: A = iso.get(s)
+  def set(b: B): T = iso.set(b)(s)
+  def modify(f: A => B): T = iso.modify(f)(s)
 
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, iso composeSetter other)
-  @inline def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, iso composeFold other)
-  @inline def composeGetter[C](other: Getter[A, C]): ApplyGetter[S, C] = ApplyGetter(s, iso composeGetter other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, iso composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, iso composeOptional  other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, iso composePrism  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, iso composeLens other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplyIso[S, T, C, D] = ApplyIso(s, iso composeIso other)
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, iso composeSetter other)
+  def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, iso composeFold other)
+  def composeGetter[C](other: Getter[A, C]): ApplyGetter[S, C] = ApplyGetter(s, iso composeGetter other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, iso composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, iso composeOptional  other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, iso composePrism  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, iso composeLens other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplyIso[S, T, C, D] = ApplyIso(s, iso composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplyIso[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplyIso[S, T, C, D] = composeIso(other)
 }
 
 final case class ApplyLens[S, T, A, B](s: S, lens: PLens[S, T, A, B]){
-  @inline def get: A = lens.get(s)
-  @inline def set(b: B): T = lens.set(b)(s)
-  @inline def modify(f: A => B): T = lens.modify(f)(s)
+  def get: A = lens.get(s)
+  def set(b: B): T = lens.set(b)(s)
+  def modify(f: A => B): T = lens.modify(f)(s)
 
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, lens composeSetter other)
-  @inline def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, lens composeFold other)
-  @inline def composeGetter[C](other: Getter[A, C]): ApplyGetter[S, C] = ApplyGetter(s, lens composeGetter other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, lens composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, lens composeOptional  other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, lens composePrism  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, lens composeLens other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, lens composeIso other)
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, lens composeSetter other)
+  def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, lens composeFold other)
+  def composeGetter[C](other: Getter[A, C]): ApplyGetter[S, C] = ApplyGetter(s, lens composeGetter other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, lens composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, lens composeOptional  other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, lens composePrism  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, lens composeLens other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplyLens[S, T, C, D] = ApplyLens(s, lens composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplyLens[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplyLens[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplyLens[S, T, C, D] = composeIso(other)
 }
 
 final case class ApplyOptional[S, T, A, B](s: S, optional: POptional[S, T, A, B]){
-  @inline def getOption: Option[A] = optional.getOption(s)
+  def getOption: Option[A] = optional.getOption(s)
 
-  @inline def modify(f: A => B): T = optional.modify(f)(s)
-  @inline def modifyOption(f: A => B): Option[T] = optional.modifyOption(f)(s)
+  def modify(f: A => B): T = optional.modify(f)(s)
+  def modifyOption(f: A => B): Option[T] = optional.modifyOption(f)(s)
 
-  @inline def set(b: B): T = optional.set(b)(s)
-  @inline def setOption(b: B): Option[T] = optional.setOption(b)(s)
+  def set(b: B): T = optional.set(b)(s)
+  def setOption(b: B): Option[T] = optional.setOption(b)(s)
 
-  @deprecated("use getOption", since = "1.1.0")
-  @inline def getMaybe: Maybe[A] = optional.getOption(s).toMaybe
-  @deprecated("use modifyOption", since = "1.1.0")
-  @inline def modifyMaybe(f: A => B): Maybe[T] = optional.modifyOption(f)(s).toMaybe
-  @deprecated("use setOption", since = "1.1.0")
-  @inline def setMaybe(b: B): Maybe[T] = optional.setOption(b)(s).toMaybe
-
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, optional composeSetter other)
-  @inline def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, optional composeFold other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, optional composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeOptional  other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composePrism  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeLens other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeIso other)
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, optional composeSetter other)
+  def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, optional composeFold other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, optional composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeOptional  other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composePrism  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeLens other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, optional composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyOptional[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplyOptional[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplyOptional[S, T, C, D] = composeIso(other)
 }
 
 final case class ApplyPrism[S, T, A, B](s: S, prism: PPrism[S, T, A, B]){
-  @inline def getOption: Option[A] = prism.getOption(s)
+  def getOption: Option[A] = prism.getOption(s)
 
-  @inline def modify(f: A => B): T = prism.modify(f)(s)
-  @inline def modifyOption(f: A => B): Option[T] = prism.modifyOption(f)(s)
+  def modify(f: A => B): T = prism.modify(f)(s)
+  def modifyOption(f: A => B): Option[T] = prism.modifyOption(f)(s)
 
-  @inline def set(b: B): T = prism.set(b)(s)
-  @inline def setOption(b: B): Option[T] = prism.setOption(b)(s)
+  def set(b: B): T = prism.set(b)(s)
+  def setOption(b: B): Option[T] = prism.setOption(b)(s)
 
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, prism composeSetter other)
-  @inline def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, prism composeFold other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, prism composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, prism composeOptional  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, prism composeLens other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, prism composePrism  other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, prism composeIso other)
-
-  @deprecated("use getOption", since = "1.1.0")
-  @inline def getMaybe: Maybe[A] = prism.getOption(s).toMaybe
-  @deprecated("use modifyOption", since = "1.1.0")
-  @inline def modifyMaybe(f: A => B): Maybe[T] = prism.modifyOption(f)(s).toMaybe
-  @deprecated("use setOption", since = "1.1.0")
-  @inline def setMaybe(b: B): Maybe[T] = prism.setOption(b)(s).toMaybe
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, prism composeSetter other)
+  def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, prism composeFold other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, prism composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, prism composeOptional  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = ApplyOptional(s, prism composeLens other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, prism composePrism  other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplyPrism[S, T, C, D] = ApplyPrism(s, prism composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyOptional[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyPrism[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplyOptional[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplyPrism[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplyPrism[S, T, C, D] = composeIso(other)
 }
 
 final case class ApplySetter[S, T, A, B](s: S, setter: PSetter[S, T, A, B]) {
-  @inline def set(b: B): T = setter.set(b)(s)
-  @inline def modify(f: A => B): T = setter.modify(f)(s)
+  def set(b: B): T = setter.set(b)(s)
+  def modify(f: A => B): T = setter.modify(f)(s)
 
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeSetter other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeOptional other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composePrism  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeLens other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeIso other)
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeSetter other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeOptional other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composePrism  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeLens other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, setter composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplySetter[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplySetter[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplySetter[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplySetter[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplySetter[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplySetter[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplySetter[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplySetter[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplySetter[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplySetter[S, T, C, D] = composeIso(other)
 }
 
 
 final case class ApplyTraversal[S, T, A, B](s: S, traversal: PTraversal[S, T, A, B]){
-  @inline def getAll: List[A] = traversal.getAll(s)
-  @inline def headOption: Option[A] = traversal.headOption(s)
+  def getAll: List[A] = traversal.getAll(s)
+  def headOption: Option[A] = traversal.headOption(s)
 
-  @inline def set(b: B): T = traversal.set(b)(s)
-  @inline def modify(f: A => B): T = traversal.modify(f)(s)
+  def set(b: B): T = traversal.set(b)(s)
+  def modify(f: A => B): T = traversal.modify(f)(s)
 
-  @inline def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, traversal composeSetter other)
-  @inline def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, traversal composeFold other)
-  @inline def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeTraversal other)
-  @inline def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeOptional other)
-  @inline def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composePrism  other)
-  @inline def composeLens[C, D](other: PLens[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeLens other)
-  @inline def composeIso[C, D](other: PIso[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeIso other)
+  def composeSetter[C, D](other: PSetter[A, B, C, D]): ApplySetter[S, T, C, D] = ApplySetter(s, traversal composeSetter other)
+  def composeFold[C](other: Fold[A, C]): ApplyFold[S, C] = ApplyFold(s, traversal composeFold other)
+  def composeTraversal[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeTraversal other)
+  def composeOptional[C, D](other: POptional[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeOptional other)
+  def composePrism[C, D](other: PPrism[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composePrism  other)
+  def composeLens[C, D](other: PLens[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeLens other)
+  def composeIso[C, D](other: PIso[A, B, C, D]): ApplyTraversal[S, T, C, D] = ApplyTraversal(s, traversal composeIso other)
 
   /** alias to composeTraversal */
-  @inline def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
+  def ^|->>[C, D](other: PTraversal[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeTraversal(other)
   /** alias to composeOptional */
-  @inline def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeOptional(other)
+  def ^|-?[C, D](other: POptional[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeOptional(other)
   /** alias to composePrism */
-  @inline def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyTraversal[S, T, C, D] = composePrism(other)
+  def ^<-?[C, D](other: PPrism[A, B, C, D]): ApplyTraversal[S, T, C, D] = composePrism(other)
   /** alias to composeLens */
-  @inline def ^|->[C, D](other: PLens[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeLens(other)
+  def ^|->[C, D](other: PLens[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeLens(other)
   /** alias to composeIso */
-  @inline def ^<->[C, D](other: PIso[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeIso(other)
+  def ^<->[C, D](other: PIso[A, B, C, D]): ApplyTraversal[S, T, C, D] = composeIso(other)
 }

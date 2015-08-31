@@ -1,12 +1,12 @@
 package monocle.std
 
+import cats.Applicative
+import cats.std.list._
+import cats.std.map._
+import cats.syntax.traverse._
+import cats.syntax.functor._
 import monocle.function._
 import monocle.{Lens, Prism, Traversal}
-
-import scalaz.std.list._
-import scalaz.std.map._
-import scalaz.syntax.traverse._
-import scalaz.Applicative
 
 object map extends MapOptics
 
@@ -25,11 +25,10 @@ trait MapOptics {
   implicit def mapIndex[K, V]: Index[Map[K, V], K  , V] = Index.atIndex
 
   implicit def mapFilterIndex[K, V]: FilterIndex[Map[K,V], K, V] = new FilterIndex[Map[K, V], K, V] {
-    import scalaz.syntax.applicative._
     def filterIndex(predicate: K => Boolean) = new Traversal[Map[K, V], V] {
-      def modifyF[F[_]: Applicative](f: V => F[V])(s: Map[K, V]): F[Map[K, V]] =
+      def modifyF[F[_]](f: V => F[V])(s: Map[K, V])(implicit F: Applicative[F]): F[Map[K, V]] =
         s.toList.traverse{ case (k, v) =>
-          (if(predicate(k)) f(v) else v.point[F]).strengthL(k)
+          (if(predicate(k)) f(v) else F.pure(v)).map(k -> _)
         }.map(_.toMap)
     }
   }

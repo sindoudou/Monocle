@@ -1,5 +1,6 @@
 package monocle.std
 
+import cats.std.boolean._
 import monocle.MonocleSuite
 import monocle.function._
 import monocle.law.discipline.OptionalTests

@@ -1,5 +1,6 @@
 package monocle.std
 
+import cats.std.all._
 import monocle.MonocleSuite
 import monocle.law.discipline.function._
 

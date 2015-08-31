@@ -1,10 +1,11 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.data.Xor
 import monocle.function.{Each, Empty}
 import monocle.{Iso, PIso, PPrism, Prism}
 
+import scalaz.Maybe
 import scalaz.syntax.std.option._
-import scalaz.{-\/, Maybe, \/-}
 
 object maybe extends MaybeOptics
 
@@ -16,7 +17,7 @@ trait MaybeOptics {
     pMaybeToOption[A, A]
 
   final def pJust[A, B]: PPrism[Maybe[A], Maybe[B], A, B] =
-    PPrism[Maybe[A], Maybe[B], A, B](_.cata(\/-(_), -\/(Maybe.empty)))(Maybe.just[B])
+    PPrism[Maybe[A], Maybe[B], A, B](_.cata(Xor.right, Xor.left(Maybe.empty)))(Maybe.just[B])
 
   final def just[A]: Prism[Maybe[A], A] =
     pJust[A, A]

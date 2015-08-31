@@ -1,6 +1,7 @@
 package monocle.syntax
 
 import monocle.function._
+import monocle.interopscalaz._
 import monocle.macros.GenLens
 import monocle.std._
 import monocle.{Lens, MonocleSuite, Prism}

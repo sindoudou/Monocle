@@ -1,17 +1,16 @@
 package monocle.law.discipline.function
 
+import cats.Eq
 import monocle.function._
+import monocle.law.discipline.internal.Tuple2Eq._
 import monocle.law.discipline.{OptionalTests, PrismTests}
-import org.scalacheck.{Arbitrary, Prop}
+import org.scalacheck.Arbitrary
 import org.typelevel.discipline.Laws
-
-import scalaz.Equal
-import scalaz.std.tuple._
 
 object ConsTests extends Laws {
 
-  def apply[S, A](implicit aEq: Equal[A], aArb: Arbitrary[A],
-                           sEq: Equal[S], sArb: Arbitrary[S],
+  def apply[S, A](implicit aEq: Eq[A], aArb: Arbitrary[A],
+                           sEq: Eq[S], sArb: Arbitrary[S],
                            evCons: Cons[S, A]): RuleSet =
     new SimpleRuleSet("Cons",
       PrismTests(cons[S, A]).props ++

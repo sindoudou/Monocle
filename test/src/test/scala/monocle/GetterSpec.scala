@@ -1,7 +1,8 @@
 package monocle
 
-import scalaz._
-
+import cats.arrow._
+import cats.data.Xor
+import cats.functor.Profunctor
 
 class GetterSpec extends MonocleSuite {
 
@@ -10,7 +11,6 @@ class GetterSpec extends MonocleSuite {
 
   val _bar = Getter[Foo, Bar](_.bar)
   val _i   = Getter[Bar, Int](_.i)
-
 
   // test implicit resolution of type classes
 
@@ -23,7 +23,7 @@ class GetterSpec extends MonocleSuite {
   }
 
   test("Getter has a Choice)stance") {
-    Choice[Getter].choice(_i, Choice[Getter].id[Int]).get(-\/(Bar(3))) shouldEqual 3
+    Choice[Getter].choice(_i, Choice[Getter].id[Int]).get(Xor.left(Bar(3))) shouldEqual 3
   }
 
   test("Getter has a Split)stance") {
@@ -31,11 +31,11 @@ class GetterSpec extends MonocleSuite {
   }
 
   test("Getter has a Profunctor)stance") {
-    Profunctor[Getter].mapsnd(_bar)(_.i).get(Foo(Bar(3))) shouldEqual 3
+    Profunctor[Getter].rmap(_bar)(_.i).get(Foo(Bar(3))) shouldEqual 3
   }
 
   test("Getter has a Arrow instance") {
-    Arrow[Getter].arr((_: Int) * 2).get(4) shouldEqual 8
+    Arrow[Getter].lift((_: Int) * 2).get(4) shouldEqual 8
   }
 
 }

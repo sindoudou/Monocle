@@ -1,14 +1,14 @@
 package monocle.generic
 
+import cats.Eq
+import cats.std.all._
 import monocle.MonocleSuite
 import monocle.function._
 import monocle.law.discipline.{IsoTests, LensTests}
 import org.scalacheck.Arbitrary
 import shapeless.HList._
 import shapeless.ops.hlist.{Init => HListInit, IsHCons}
-import shapeless.{::, Generic, HNil}
-
-import scalaz.Equal
+import shapeless.{::, HNil}
 
 class HListSpec extends MonocleSuite {
 
@@ -23,11 +23,11 @@ class HListSpec extends MonocleSuite {
   type HTail    = isHCons.T
   type HInit    = hListinit.Out
 
-  implicit val exampleEq  = Equal.equalA[Example]
-  implicit val hEq        = Equal.equal[H]((a1, a2) => fromHList[H, Example].get(a1) === fromHList[H, Example].get(a2))
-  implicit val reverseHEq = Equal.equal[ReverseH]((a1, a2) => a1.reverse === a2.reverse)
-  implicit val hTailEq    = Equal.equal[HTail]((a1, a2) => (1 :: a1) === (1 :: a2))
-  implicit val hInitEq    = Equal.equal[HInit]((a1, a2) => (a1.tail :+ 3.5) === (a2.tail :+ 3.5))
+  implicit val exampleEq  = Eq.fromUniversalEquals[Example]
+  implicit val hEq        = Eq.instance[H]((a1, a2) => fromHList[H, Example].get(a1) === fromHList[H, Example].get(a2))
+  implicit val reverseHEq = Eq.instance[ReverseH]((a1, a2) => a1.reverse === a2.reverse)
+  implicit val hTailEq    = Eq.instance[HTail]((a1, a2) => (1 :: a1) === (1 :: a2))
+  implicit val hInitEq    = Eq.instance[HInit]((a1, a2) => (a1.tail :+ 3.5) === (a2.tail :+ 3.5))
 
   implicit val exampleArb: Arbitrary[Example] = Arbitrary(for{
     i <- Arbitrary.arbitrary[Int]
@@ -51,7 +51,6 @@ class HListSpec extends MonocleSuite {
   checkAll("fourth from HList", LensTests(fourth[H, Float]))
   checkAll("fifth from HList", LensTests(fifth[H, Long]))
   checkAll("sixth from HList", LensTests(sixth[H, Double]))
-
 
   checkAll("reverse HList", IsoTests(reverse[H, ReverseH]))
   checkAll("hcons HList", IsoTests(cons1[H, Int  , HTail]))

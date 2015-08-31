@@ -4,9 +4,9 @@ import monocle.function._
 import monocle.{Optional, Prism}
 
 import scala.collection.immutable.Stream.{#::, Empty}
-import scalaz.Id.Id
-import scalaz.std.stream._
-import scalaz.syntax.traverse._
+import cats.Id
+import cats.std.stream._
+import cats.syntax.traverse._
 
 object stream extends StreamOptics
 

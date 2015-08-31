@@ -4,7 +4,7 @@ import monocle.Prism
 import monocle.function.Index
 import monocle.internal.{Bits, Bounded}
 
-import scalaz.Order
+import cats.Order
 
 object char extends CharOptics
 
@@ -14,7 +14,7 @@ trait CharOptics {
     Bits.bitsIndex[Char]
 
   implicit val charOrder: Order[Char] =
-    Order.fromScalaOrdering[Char]
+    Order.from(Ordering[Char].compare)
 
   val charToBoolean: Prism[Char, Boolean] =
     Bounded.orderingBoundedSafeCast[Char, Boolean]{

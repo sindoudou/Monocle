@@ -1,7 +1,7 @@
 package monocle
 
 import cats.{Applicative, Functor, Monoid}
-import cats.arrow.Split
+import cats.arrow.{Choice, Split}
 import cats.data.Xor
 
 /**
@@ -41,19 +41,19 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
   def set(b: B): S => T
 
   /** modify polymorphically the target of a [[PLens]] using Functor function */
-  def modifyF[F[_]: Functor](f: A => F[B])(s: S): F[T]
+  def modifyF[F[_]](f: A => F[B])(s: S)(implicit F: Functor[F]): F[T]
 
   /** modify polymorphically the target of a [[PLens]] using a function */
   def modify(f: A => B): S => T
 
   /** join two [[PLens]] with the same target */
-  @inline final def sum[S1, T1](other: PLens[S1, T1, A, B]): PLens[S Xor S1, T Xor T1, A, B] =
+  final def sum[S1, T1](other: PLens[S1, T1, A, B]): PLens[S Xor S1, T Xor T1, A, B] =
     PLens[S Xor S1, T Xor T1, A, B](_.fold(self.get, other.get)){
       b => _.bimap(self.set(b), other.set(b))
     }
 
   /** pair two disjoint [[PLens]] */
-  @inline final def product[S1, T1, A1, B1](other: PLens[S1, T1, A1, B1]): PLens[(S, S1), (T, T1), (A, A1), (B, B1)] =
+  final def product[S1, T1, A1, B1](other: PLens[S1, T1, A1, B1]): PLens[(S, S1), (T, T1), (A, A1), (B, B1)] =
     PLens[(S, S1), (T, T1), (A, A1), (B, B1)]{
       case (s, s1) => (self.get(s), other.get(s1))
     }{ case (b, b1) => {
@@ -61,7 +61,7 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
       }
     }
 
-  @inline final def first[C]: PLens[(S, C), (T, C), (A, C), (B, C)] =
+  final def first[C]: PLens[(S, C), (T, C), (A, C), (B, C)] =
     PLens[(S, C), (T, C), (A, C), (B, C)]{
       case (s, c) => (get(s), c)
     }{ case (b, c) => {
@@ -69,7 +69,7 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
       }
     }
 
-  @inline final def second[C]: PLens[(C, S), (C, T), (C, A), (C, B)] =
+  final def second[C]: PLens[(C, S), (C, T), (C, A), (C, B)] =
     PLens[(C, S), (C, T), (C, A), (C, B)]{
       case (c, s) => (c, get(s))
     }{ case (c, b) => {
@@ -82,31 +82,31 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
   /***********************************************************/
 
   /** compose a [[PLens]] with a [[Fold]] */
-  @inline final def composeFold[C](other: Fold[A, C]): Fold[S, C] =
+  final def composeFold[C](other: Fold[A, C]): Fold[S, C] =
     asFold composeFold other
 
   /** compose a [[PLens]] with a [[Getter]] */
-  @inline final def composeGetter[C](other: Getter[A, C]): Getter[S, C] =
+  final def composeGetter[C](other: Getter[A, C]): Getter[S, C] =
     asGetter composeGetter other
 
   /** compose a [[PLens]] with a [[PSetter]] */
-  @inline final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
+  final def composeSetter[C, D](other: PSetter[A, B, C, D]): PSetter[S, T, C, D] =
     asSetter composeSetter other
 
   /** compose a [[PLens]] with a [[PTraversal]] */
-  @inline final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
+  final def composeTraversal[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
     asTraversal composeTraversal other
 
   /** compose a [[PLens]] with an [[POptional]] */
-  @inline final def composeOptional[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
+  final def composeOptional[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
     asOptional composeOptional other
 
   /** compose a [[PLens]] with a [[PPrism]] */
-  @inline final def composePrism[C, D](other: PPrism[A, B, C, D]): POptional[S, T, C, D] =
+  final def composePrism[C, D](other: PPrism[A, B, C, D]): POptional[S, T, C, D] =
     asOptional composeOptional other.asOptional
 
   /** compose a [[PLens]] with a [[PLens]] */
-  @inline final def composeLens[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
+  final def composeLens[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
     new PLens[S, T, C, D]{
       def get(s: S): C =
         other.get(self.get(s))
@@ -122,7 +122,7 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
     }
 
   /** compose a [[PLens]] with an [[PIso]] */
-  @inline final def composeIso[C, D](other: PIso[A, B, C, D]): PLens[S, T, C, D] =
+  final def composeIso[C, D](other: PIso[A, B, C, D]): PLens[S, T, C, D] =
     composeLens(other.asLens)
 
   /********************************************/
@@ -130,23 +130,23 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
   /********************************************/
 
   /** alias to composeTraversal */
-  @inline final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
+  final def ^|->>[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] =
     composeTraversal(other)
 
   /** alias to composeOptional */
-  @inline final def ^|-?[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
+  final def ^|-?[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] =
     composeOptional(other)
 
   /** alias to composePrism */
-  @inline final def ^<-?[C, D](other: PPrism[A, B, C, D]): POptional[S, T, C, D] =
+  final def ^<-?[C, D](other: PPrism[A, B, C, D]): POptional[S, T, C, D] =
     composePrism(other)
 
   /** alias to composeLens */
-  @inline final def ^|->[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
+  final def ^|->[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] =
     composeLens(other)
 
   /** alias to composeIso */
-  @inline final def ^<->[C, D](other: PIso[A, B, C, D]): PLens[S, T, C, D] =
+  final def ^<->[C, D](other: PIso[A, B, C, D]): PLens[S, T, C, D] =
     composeIso(other)
 
   /************************************************************************************************/
@@ -154,21 +154,21 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
   /************************************************************************************************/
 
   /** view a [[PLens]] as a [[Fold]] */
-  @inline final def asFold: Fold[S, A] =
+  final def asFold: Fold[S, A] =
     new Fold[S, A] {
       def foldMap[M: Monoid](f: A => M)(s: S): M =
         f(get(s))
     }
 
   /** view a [[PLens]] as a [[Getter]] */
-  @inline final def asGetter: Getter[S, A] =
+  final def asGetter: Getter[S, A] =
     new Getter[S, A]{
       def get(s: S): A =
         self.get(s)
     }
 
   /** view a [[PLens]] as a [[PSetter]] */
-  @inline final def asSetter: PSetter[S, T, A, B] =
+  final def asSetter: PSetter[S, T, A, B] =
     new PSetter[S, T, A, B]{
       def modify(f: A => B): S => T =
         self.modify(f)
@@ -178,14 +178,14 @@ abstract class PLens[S, T, A, B] extends Serializable { self =>
     }
 
   /** view a [[PLens]] as a [[PTraversal]] */
-  @inline final def asTraversal: PTraversal[S, T, A, B] =
+  final def asTraversal: PTraversal[S, T, A, B] =
     new PTraversal[S, T, A, B] {
       def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T] =
         self.modifyF(f)(s)
     }
 
   /** view a [[PLens]] as an [[POptional]] */
-  @inline final def asOptional: POptional[S, T, A, B] =
+  final def asOptional: POptional[S, T, A, B] =
     new POptional[S, T, A, B] {
       def getOrModify(s: S): T Xor A =
         Xor.right(get(s))
@@ -249,7 +249,7 @@ object Lens {
 
 sealed abstract class LensInstances extends LensInstances0 {
   implicit val lensChoice: Choice[Lens] = new Choice[Lens] {
-    def choice[A, B, C](f: => Lens[A, C], g: => Lens[B, C]): Lens[A Xor B, C] =
+    override def choice[A, B, C](f: Lens[A, C], g: Lens[B, C]): Lens[A Xor B, C] = 
       f sum g
 
     def id[A]: Lens[A, A] =

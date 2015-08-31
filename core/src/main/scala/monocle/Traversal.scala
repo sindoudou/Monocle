@@ -1,7 +1,9 @@
 package monocle
 
+import cats.arrow.Choice
 import cats.{Applicative, Functor, Id, Monoid, Traverse}
 import cats.data.{Const, Xor}
+import cats.std.list._
 import monocle.internal.{First, Conjunction}
 
 /**
@@ -28,14 +30,14 @@ abstract class PTraversal[S, T, A, B] extends Serializable { self =>
    * modify polymorphically the target of a [[PTraversal]] with an Applicative function
    * all traversal methods are written in terms of modifyF
    */
-  def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T]
+  def modifyF[F[_]](f: A => F[B])(s: S)(implicit F: Applicative[F]): F[T]
 
   /** map each target to a Monoid and combine the results */
   final def foldMap[M: Monoid](f: A => M)(s: S): M =
     modifyF[Const[M, ?]](a => Const(f(a)))(s).getConst
 
   /** combine all targets using a target's Monoid */
-  final def fold(s: S)(implicit ev: Monoid[A]): A =
+  final def fold(s: S)(implicit A: Monoid[A]): A =
     foldMap(identity)(s)
 
   /** get all the targets of a [[PTraversal]] */
@@ -240,8 +242,8 @@ sealed abstract class TraversalInstances {
     def id[A]: Traversal[A, A] =
       Traversal.id
 
-    def choice[A, B, C](f1: => Traversal[A, C], f2: => Traversal[B, C]): Traversal[A Xor B, C] =
-      f1 sum f2
+    override def choice[A, B, C](f: Traversal[A, C], g: Traversal[B, C]): Traversal[A Xor B, C] =
+      f sum g
   }
 }
 

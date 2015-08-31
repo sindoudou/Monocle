@@ -1,6 +1,8 @@
 package monocle.std
 
+import cats.std.int._
 import monocle.MonocleSuite
+import monocle.interopscalaz._
 import monocle.syntax._
 
 import scalaz.Tree._

@@ -1,10 +1,9 @@
 package monocle.std
 
+import cats.std.int._
 import monocle.Prism
 import monocle.function.Index
 import monocle.internal.{Bits, Bounded}
-
-import scalaz.std.anyVal._
 
 object int extends IntOptics
 
@@ -21,6 +20,5 @@ trait IntOptics {
 
   val intToBoolean: Prism[Int, Boolean] =
     intToByte composePrism byte.byteToBoolean
-
 
 }

@@ -2,6 +2,8 @@ package monocle
 
 import cats.data.Xor
 import cats.{Foldable, Monoid}
+import cats.std.list._
+import cats.arrow.Choice
 import monocle.internal.{Conjunction, First}
 
 /**
@@ -142,7 +144,7 @@ object Fold extends FoldInstances {
 
 sealed abstract class FoldInstances {
   implicit val foldChoice: Choice[Fold] = new Choice[Fold]{
-    def choice[A, B, C](f: => Fold[A, C], g: => Fold[B, C]): Fold[A Xor B, C] =
+    override def choice[A, B, C](f: Fold[A, C], g: Fold[B, C]): Fold[A Xor B, C] =
       f sum g
 
     def id[A]: Fold[A, A] =

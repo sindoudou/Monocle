@@ -1,9 +1,10 @@
 package monocle.std
 
+import cats.std.boolean._
+import cats.std.byte._
 import monocle.MonocleSuite
 import monocle.function._
 import monocle.law.discipline.{OptionalTests, PrismTests}
-
 
 class ByteSpec extends MonocleSuite {
 

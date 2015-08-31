@@ -1,10 +1,9 @@
 package monocle.std
 
+import cats.std.byte._
 import monocle.Prism
 import monocle.function.Index
 import monocle.internal.{Bits, Bounded}
-
-import scalaz.std.anyVal._
 
 object byte extends ByteOptics
 

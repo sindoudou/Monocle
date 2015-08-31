@@ -1,5 +1,7 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.std.int._
+import cats.std.list._
 import monocle.MonocleSuite
 import monocle.law.discipline.function._
 

@@ -1,8 +1,10 @@
 package monocle
 
+import cats.arrow.{Category, Choice, Compose}
+import cats.data.Xor
+import cats.std.int._
+import cats.std.list._
 import monocle.law.discipline.{OptionalTests, SetterTests, TraversalTests}
-
-import scalaz._
 
 class OptionalSpec extends MonocleSuite {
 
@@ -33,7 +35,7 @@ class OptionalSpec extends MonocleSuite {
   }
 
   test("Optional has a Choice instance") {
-    Choice[Optional].choice(headOption[Int], Category[Optional].id[Int]).getOption(-\/(List(1,2,3))) shouldEqual Some(1)
+    Choice[Optional].choice(headOption[Int], Category[Optional].id[Int]).getOption(Xor.left(List(1,2,3))) shouldEqual Some(1)
   }
 
 

@@ -1,38 +1,31 @@
 package monocle
 
+import cats.Eq
+import cats.arrow.{Category, Compose, Split}
+import cats.std.int._
+import cats.std.unit._
 import monocle.law.discipline._
 import monocle.macros.GenIso
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
-
-import scalaz.std.anyVal._
-import scalaz.{Category, Compose, Equal, Split}
+import org.scalacheck.{Arbitrary, Gen}
 
 class IsoSpec extends MonocleSuite {
 
   case class IntWrapper(i: Int)
-
   implicit val intWrapperGen: Arbitrary[IntWrapper] = Arbitrary(arbitrary[Int].map(IntWrapper.apply))
-
-  implicit val intWrapperEq = Equal.equalA[IntWrapper]
+  implicit val intWrapperEq = Eq.fromUniversalEquals[IntWrapper]
 
   case object AnObject
-
   implicit val anObjectGen: Arbitrary[AnObject.type] = Arbitrary(Gen.const(AnObject))
-
-  implicit val anObjectEq = Equal.equalA[AnObject.type]
+  implicit val anObjectEq = Eq.fromUniversalEquals[AnObject.type]
 
   case class EmptyCase()
-
   implicit val emptyCaseGen: Arbitrary[EmptyCase] = Arbitrary(Gen.const(EmptyCase()))
-
-  implicit val emptyCaseEq = Equal.equalA[EmptyCase]
+  implicit val emptyCaseEq = Eq.fromUniversalEquals[EmptyCase]
 
   case class EmptyCaseType[A]()
-
   implicit def emptyCaseTypeGen[A]: Arbitrary[EmptyCaseType[A]] = Arbitrary(Gen.const(EmptyCaseType()))
-
-  implicit def emptyCaseTypeEq[A] = Equal.equalA[EmptyCaseType[A]]
+  implicit def emptyCaseTypeEq[A] = Eq.fromUniversalEquals[EmptyCaseType[A]]
 
   val iso = Iso[IntWrapper, Int](_.i)(IntWrapper.apply)
 
@@ -64,7 +57,6 @@ class IsoSpec extends MonocleSuite {
   test("Iso has a Split)stance") {
     Split[Iso].split(iso, iso.reverse).get((IntWrapper(3), 3)) shouldEqual ((3, IntWrapper(3)))
   }
-
 
 }
 

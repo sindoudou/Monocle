@@ -1,4 +1,4 @@
-package monocle.std
+package monocle.interopscalaz
 
 import monocle.function.{At, Empty}
 import monocle.{Lens, Prism}

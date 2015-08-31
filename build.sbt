@@ -33,16 +33,18 @@ lazy val buildSettings = Seq(
   scmInfo := Some(ScmInfo(url("https://github.com/julien-truffaut/Monocle"), "scm:git:git@github.com:julien-truffaut/Monocle.git"))
 )
 
-lazy val cats       = "org.spire-math"  %% "cats-core"   % "0.1.3-SNAPSHOT"
+val catsVersion = "0.1.3-SNAPSHOT"
+lazy val cats       = "org.spire-math"  %% "cats-core"   % catsVersion
 lazy val scalaz     = "org.scalaz"      %% "scalaz-core" % "7.1.3"
 lazy val shapeless  = "com.chuusai"     %% "shapeless"   % "2.2.5"
 
-lazy val discpline  = "org.typelevel"   %% "discipline"  % "0.3"
-lazy val scalatest  = "org.scalatest"   %% "scalatest"   % "2.2.4"  % "test"
+lazy val discpline  = "org.typelevel"   %% "discipline"  % "0.4"
+lazy val scalatest  = "org.scalatest"   %% "scalatest"   % "3.0.0-M7" % "test"
+lazy val catsLaws   = "org.spire-math"  %% "cats-laws"   % catsVersion
 
 lazy val macroVersion = "2.0.1"
 lazy val paradisePlugin = compilerPlugin("org.scalamacros" %  "paradise"       % macroVersion cross CrossVersion.full)
-lazy val kindProjector  = compilerPlugin("org.spire-math"  %% "kind-projector" % "0.6.0")
+lazy val kindProjector  = compilerPlugin("org.spire-math"  %% "kind-projector" % "0.5.4")
 
 def mimaSettings(module: String): Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
   previousArtifact := Some("com.github.julien-truffaut" %  (s"monocle-${module}_2.11") % "1.1.0")
@@ -101,12 +103,12 @@ lazy val state = project.dependsOn(core)
   .settings(monocleSettings)
   .settings(libraryDependencies := Seq(scalaz))
 
-lazy val test = project.dependsOn(core, generic, macros, law)
+lazy val test = project.dependsOn(core, generic, macros, law, `scalaz-support`)
   .settings(moduleName := "monocle-test")
   .settings(monocleSettings)
   .settings(noPublishSettings)
   .settings(
-    libraryDependencies ++= Seq(scalaz, shapeless, scalatest, compilerPlugin(paradisePlugin))
+    libraryDependencies ++= Seq(scalaz, shapeless, scalatest, catsLaws, compilerPlugin(paradisePlugin))
   )
 
 lazy val bench = project

@@ -47,12 +47,21 @@ class ImportExample extends MonocleSuite {
     import monocle.function._
     import monocle.std._
 
-    // do not compile because Head instance for HList is not in scope
-    illTyped { """head[Int :: HNil, Int].modify(1 :: HNil, _ + 1) shouldEqual (2 :: HNil)""" }
+    // do not compile because Head instance for IList is not in scope
+    illTyped { """each[IList[Int], Int]""" }
 
     each[List[Int], Int].modify(_ + 1)(List(1,2,3))   shouldEqual List(2,3,4)
+  }
+
+  test("monocle.interopscalaz._ brings all polymorphic Optic instances in scope for scalaz classes") {
+    import monocle.function._
+    import monocle.interopscalaz._
+
+    // do not compile because Head instance for List is not in scope
+    illTyped { """each[List[Int], Int]""" }
     each[IList[Int], Int].modify(_ + 1)(IList(1,2,3)) shouldEqual IList(2,3,4)
   }
+
 
   test("monocle.generic._ brings all polymorphic Optic instances in scope for Shapeless classes") {
     import monocle.function._
@@ -64,12 +73,11 @@ class ImportExample extends MonocleSuite {
     first[Int :: HNil, Int].modify(_ + 1)(1 :: HNil) shouldEqual (2 :: HNil)
   }
 
-  test("monocle._, Monocle._ makes all Monocle core features available (no generic)") {
+  test("monocle._, Monocle._ makes all Monocle core features available (no generic or scalaz)") {
     import monocle._
     import Monocle._
 
     each[List[Int], Int].modify(_ + 1)(List(1,2,3))   shouldEqual List(2,3,4)
-    each[IList[Int], Int].modify(_ + 1)(IList(1,2,3)) shouldEqual IList(2,3,4)
   }
 
 }

@@ -1,17 +1,16 @@
 package monocle.law.discipline
 
+import cats.Eq
+import cats.std.option._
 import monocle.Prism
 import monocle.law.PrismLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop._
 import org.typelevel.discipline.Laws
 
-import scalaz.Equal
-import scalaz.std.option._
-
 object PrismTests extends Laws {
 
-  def apply[S: Arbitrary : Equal, A: Arbitrary : Equal](prism: Prism[S, A]): RuleSet = {
+  def apply[S: Arbitrary : Eq, A: Arbitrary : Eq](prism: Prism[S, A]): RuleSet = {
     val laws: PrismLaws[S, A] = new PrismLaws(prism)
     new SimpleRuleSet("Prism",
       "partial round trip one way" -> forAll( (s: S) => laws.partialRoundTripOneWay(s)),

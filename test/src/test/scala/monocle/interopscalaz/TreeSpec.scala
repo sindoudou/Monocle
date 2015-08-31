@@ -1,5 +1,7 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.std.int._
+import cats.std.stream._
 import monocle.MonocleSuite
 import monocle.law.discipline.LensTests
 import monocle.law.discipline.function.{EachTests, ReverseTests}

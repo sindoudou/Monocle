@@ -1,7 +1,7 @@
 package monocle.std
 
 import monocle.MonocleSuite
-import monocle.std.{validation => mValidation}
+import monocle.interopscalaz.{validation => mValidation, _}
 
 import scalaz.syntax.validation._
 

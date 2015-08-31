@@ -1,26 +1,31 @@
-package monocle.std
+package monocle.interopscalaz
 
-import monocle.{Prism, Iso, PIso, PPrism}
+import cats.data.Validated
+import monocle.std.validated
+import monocle.{Iso, PIso, PPrism, Prism}
 
-import scalaz.syntax.either._
-import scalaz.syntax.validation._
 import scalaz.{Validation, \/}
 
 object validation extends ValidationOptics
 
 trait ValidationOptics {
+
+  final def pValidationToValidated[E1, E2, A1, A2]: PIso[Validation[E1, A1], Validation[E2, A2], Validated[E1, A1], Validated[E2, A2]] =
+    PIso[Validation[E1, A1], Validation[E2, A2], Validated[E1, A1], Validated[E2, A2]](
+      _.fold(Validated.invalid, Validated.valid))(_.fold(Validation.failure, Validation.success)
+    )
+
+  final def validationToValidated[E, A]: Iso[Validation[E, A], Validated[E, A]] =
+    pValidationToValidated[E, E, A, A]
+
   final def pSuccess[E, A, B]: PPrism[Validation[E, A], Validation[E, B], A, B] =
-    PPrism[Validation[E, A], Validation[E, B], A, B](
-      _.fold(e => Validation.failure[E, B](e).left[A], a => a.right[Validation[E, B]])
-    )(_.success[E])
+    pValidationToValidated composePrism validated.pValid
 
   final def success[E, A]: Prism[Validation[E, A], A] =
     pSuccess[E, A, A]
 
   final def pFailure[E, A, F]: PPrism[Validation[E, A], Validation[F, A], E, F] =
-    PPrism[Validation[E, A], Validation[F, A], E, F](
-      _.fold(e => e.right[Validation[F, A]], a => Validation.success[F, A](a).left[E])
-    )(_.failure[A])
+    pValidationToValidated composePrism validated.pInvalid
 
   final def failure[E, A]: Prism[Validation[E, A], E] =
     pFailure[E, A, E]

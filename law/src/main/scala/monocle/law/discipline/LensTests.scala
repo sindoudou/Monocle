@@ -1,16 +1,15 @@
 package monocle.law.discipline
 
+import cats.Eq
 import monocle.Lens
 import monocle.law.LensLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop._
 import org.typelevel.discipline.Laws
 
-import scalaz.Equal
-
 object LensTests extends Laws {
 
-  def apply[S: Arbitrary : Equal, A: Arbitrary : Equal](lens: Lens[S, A]): RuleSet = {
+  def apply[S: Arbitrary : Eq, A: Arbitrary : Eq](lens: Lens[S, A]): RuleSet = {
     val laws: LensLaws[S, A] = new LensLaws(lens)
     new SimpleRuleSet("Lens",
       "set what you get" -> forAll( (s: S) => laws.getSet(s)),

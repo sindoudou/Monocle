@@ -1,9 +1,8 @@
 package monocle.law
 
+import cats.Id
 import monocle.Lens
 import monocle.internal.IsEq
-
-import scalaz.Id._
 
 class LensLaws[S, A](lens: Lens[S, A]) {
   import IsEq.syntax
@@ -21,5 +20,5 @@ class LensLaws[S, A](lens: Lens[S, A]) {
     lens.modify(identity)(s) <==> s
 
   def modifyFId(s: S): IsEq[S] =
-    lens.modifyF[Id](id.point[A](_))(s) <==> s
+    lens.modifyF[Id](Id.pure[A](_))(s) <==> s
 }

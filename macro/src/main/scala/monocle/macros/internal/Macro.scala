@@ -71,7 +71,7 @@ private[macros] object MacroImpl extends MacrosCompatibility {
 
     c.Expr[Lens[S, A]](q"""
       import monocle.PLens
-      import scalaz.Functor
+      import cats.Functor
 
       new PLens[$sTpe, $sTpe, $aTpe, $aTpe]{
         def get(s: $sTpe): $aTpe =

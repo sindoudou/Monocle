@@ -52,7 +52,7 @@ abstract class PIso[S, T, A, B] extends Serializable { self =>
   def reverse: PIso[B, A, T, S]
 
   /** modify polymorphically the target of a [[PIso]] with a Functor function */
-  final def modifyF[F[_]: Functor](f: A => F[B])(s: S): F[T] =
+  final def modifyF[F[_]](f: A => F[B])(s: S)(implicit F: Functor[F]): F[T] =
     Functor[F].map(f(get(s)))(reverseGet)
 
   /** modify polymorphically the target of a [[PIso]] with a function */

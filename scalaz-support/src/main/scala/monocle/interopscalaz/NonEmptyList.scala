@@ -1,10 +1,11 @@
-package monocle.std
+package monocle.interopscalaz
 
 import monocle.function._
+import monocle.std.list
 import monocle.{PIso, Iso, Optional}
 
 import scalaz.NonEmptyList._
-import scalaz.{NonEmptyList, OneAnd}
+import scalaz.{Traverse, NonEmptyList, OneAnd}
 
 object nel extends NonEmptyListOptics
 
@@ -18,7 +19,7 @@ trait NonEmptyListOptics {
     pNelAndOneIso[A, A]
 
   implicit def nelEach[A]: Each[NonEmptyList[A], A] =
-    Each.traverseEach[NonEmptyList, A]
+    Each.traverseEach[NonEmptyList, A](typeclass.traverse.get(Traverse[NonEmptyList]))
 
   implicit def nelIndex[A]: Index[NonEmptyList[A], Int, A] =
     new Index[NonEmptyList[A], Int, A] {
@@ -31,7 +32,7 @@ trait NonEmptyListOptics {
   implicit def nelFilterIndex[A]: FilterIndex[NonEmptyList[A], Int, A] =
     FilterIndex.traverseFilterIndex[NonEmptyList, A](n =>
       n.zip(NonEmptyList(0, Stream.from(1).take(n.size): _*))
-    )
+    )(typeclass.traverse.get(Traverse[NonEmptyList]))
 
   implicit def nelReverse[A]: Reverse[NonEmptyList[A], NonEmptyList[A]] =
     reverseFromReverseFunction[NonEmptyList[A]](_.reverse)

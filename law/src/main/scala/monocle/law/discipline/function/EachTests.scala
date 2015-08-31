@@ -1,18 +1,16 @@
 package monocle.law.discipline.function
 
+import cats.Eq
 import monocle.function._
 import monocle.law.discipline.TraversalTests
-import org.scalacheck.{Arbitrary, Prop}
+import org.scalacheck.Arbitrary
 import org.typelevel.discipline.Laws
-
-import scalaz.Equal
-
 
 object EachTests extends Laws {
 
-  def apply[S, A](implicit aEq: Equal[A], aArb: Arbitrary[A],
-                              sEq: Equal[S], sArb: Arbitrary[S],
-                           evEach: Each[S, A]): RuleSet =
+  def apply[S, A](implicit aEq: Eq[A], aArb: Arbitrary[A],
+                           sEq: Eq[S], sArb: Arbitrary[S],
+                        evEach: Each[S, A]): RuleSet =
     new SimpleRuleSet("Each", TraversalTests(each[S, A]).props: _*)
 
 }

@@ -1,6 +1,8 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.std.char._
 import monocle.MonocleSuite
+import monocle.interopscalaz.ilist._
 import monocle.law.discipline.function.{ConsTests, EmptyTests, ReverseTests}
 
 import scalaz.IList

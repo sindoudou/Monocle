@@ -1,18 +1,17 @@
 package monocle.law.discipline
 
+import cats.Eq
+import cats.std.list._
+import cats.std.option._
 import monocle.Traversal
 import monocle.law.TraversalLaws
+import org.scalacheck.Arbitrary
 import org.scalacheck.Prop._
-import org.scalacheck.{Arbitrary, Prop}
 import org.typelevel.discipline.Laws
-
-import scalaz.Equal
-import scalaz.std.list._
-import scalaz.std.option._
 
 object TraversalTests extends Laws {
 
-  def apply[S: Arbitrary : Equal, A: Arbitrary : Equal](traversal: Traversal[S, A]): RuleSet = {
+  def apply[S: Arbitrary : Eq, A: Arbitrary : Eq](traversal: Traversal[S, A]): RuleSet = {
     val laws: TraversalLaws[S, A] = new TraversalLaws(traversal)
     new SimpleRuleSet("Traversal",
       "get what you set" -> forAll( (s: S, a: A) => laws.setGetAll(s, a)),

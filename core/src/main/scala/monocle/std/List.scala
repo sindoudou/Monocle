@@ -1,13 +1,13 @@
 package monocle.std
 
+import cats.std.list._
+import cats.std.option._
+import cats.syntax.traverse._
+import cats.{Applicative, Id}
 import monocle.function._
 import monocle.{Optional, Prism}
 
-import scalaz.Id.Id
-import scalaz.std.list._
-import scalaz.std.option._
-import scalaz.syntax.traverse._
-import scalaz.{Applicative, \/}
+import scala.util.Try
 
 object list extends ListOptics
 
@@ -48,7 +48,7 @@ trait ListOptics {
 
   implicit def listSnoc[A]: Snoc[List[A], A] = new Snoc[List[A], A]{
     def snoc = Prism[List[A], (List[A], A)](
-      s => Applicative[Option].apply2(\/.fromTryCatchNonFatal(s.init).toOption, s.lastOption)((_,_))){
+      s => Applicative[Option].map2(Try(s.init).toOption, s.lastOption)((_,_))){
       case (init, last) => init :+ last
     }
   }

@@ -1,5 +1,6 @@
 package monocle
 
+import cats.arrow.Choice
 import cats.{Applicative, Monoid}
 import cats.data.Xor
 
@@ -37,21 +38,21 @@ abstract class POptional[S, T, A, B] extends Serializable { self =>
   def getOption(s: S): Option[A]
 
   /** modify polymorphically the target of a [[POptional]] with an Applicative function */
-  def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T]
+  def modifyF[F[_]](f: A => F[B])(s: S)(implicit F: Applicative[F]): F[T]
 
   /** modify polymorphically the target of a [[POptional]] with a function */
   def modify(f: A => B): S => T
 
   /**
    * modify polymorphically the target of a [[POptional]] with a function.
-   * return empty if the [[POptional]] is not matching
+   * return empty if the [[POptional]] is not getOrModify
    */
   final def modifyOption(f: A => B): S => Option[T] =
     s => getOption(s).map(a => set(f(a))(s))
 
   /**
    * set polymorphically the target of a [[POptional]] with a value.
-   * return empty if the [[POptional]] is not matching
+   * return empty if the [[POptional]] is not getOrModify
    */
   final def setOption(b: B): S => Option[T] =
     modifyOption(_ => b)
@@ -253,7 +254,7 @@ object Optional {
 
 sealed abstract class OptionalInstances {
   implicit val optionalChoice: Choice[Optional] = new Choice[Optional] {
-    def choice[A, B, C](f: => Optional[A, C], g: => Optional[B, C]): Optional[A Xor B, C] =
+    override def choice[A, B, C](f: Optional[A, C], g: Optional[B, C]): Optional[A Xor B, C] =
       f sum g
 
     def id[A]: Optional[A, A] =

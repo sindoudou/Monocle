@@ -1,6 +1,7 @@
 package monocle
 
 import cats.Functor
+import cats.arrow.Choice
 import cats.functor.{Profunctor, Contravariant}
 import cats.data.Xor
 
@@ -154,7 +155,7 @@ sealed abstract class SetterInstances {
     def id[A]: Setter[A, A] =
       Setter.id
 
-    def choice[A, B, C](f1: => Setter[A, C], f2: => Setter[B, C]): Setter[A Xor B, C] =
-      f1 sum f2
+    override def choice[A, B, C](f: Setter[A, C], g: Setter[B, C]): Setter[A Xor B, C] =
+      f sum g
   }
 }

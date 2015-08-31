@@ -1,4 +1,7 @@
-package monocle.std
+package monocle.interopscalaz
+
+import cats.data.Xor
+import monocle.std.xor
 
 import scalaz.{Validation, \/-, -\/, \/}
 import monocle.{Iso, PIso, Prism, PPrism}
@@ -6,15 +9,21 @@ import monocle.{Iso, PIso, Prism, PPrism}
 object disjunction extends DisjunctionOptics
 
 trait DisjunctionOptics {
-  
+
+  final def pDisjunctionToXor[E1, E2, A1, A2]: PIso[E1 \/ A1, E2 \/ A2, E1 Xor A1, E2 Xor A2] =
+    PIso[E1 \/ A1, E2 \/ A2, E1 Xor A1, E2 Xor A2](_.fold(Xor.left, Xor.right))(_.fold(\/.left, \/.right))
+
+  final def disjunctionToXor[E, A]: Iso[E \/ A, E Xor A] =
+    pDisjunctionToXor[E, E, A, A]
+
   final def pLeft[A, B, C]: PPrism[A \/ B, C \/ B, A, C] =
-    PPrism[A \/ B, C \/ B, A, C](_.swap.bimap(\/-.apply, identity))(-\/.apply)
+    pDisjunctionToXor composePrism xor.pLeft
 
   final def left[A, B]: Prism[A \/ B, A] =
     pLeft[A, B, A]
 
   final def pRight[A, B, C]: PPrism[A \/ B, A \/ C, B, C] =
-    PPrism[A \/ B, A \/ C, B, C](_.bimap(-\/.apply, identity))(\/-.apply)
+    pDisjunctionToXor composePrism xor.pRight
 
   final def right[A, B]: Prism[A \/ B, B] =
     pRight[A, B, B]

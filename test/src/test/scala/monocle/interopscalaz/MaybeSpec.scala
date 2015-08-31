@@ -1,5 +1,6 @@
-package monocle.std
+package monocle.interopscalaz
 
+import cats.std.all._
 import monocle.MonocleSuite
 import monocle.law.discipline.function.{EachTests, EmptyTests}
 import monocle.law.discipline.{IsoTests, PrismTests}

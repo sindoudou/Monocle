@@ -1,17 +1,16 @@
 package monocle.law.discipline
 
+import cats.Eq
+import cats.std.option._
 import monocle.Optional
 import monocle.law.OptionalLaws
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop._
 import org.typelevel.discipline.Laws
 
-import scalaz.Equal
-import scalaz.std.option._
-
 object OptionalTests extends Laws {
 
-  def apply[S: Arbitrary : Equal, A: Arbitrary : Equal](optional: Optional[S, A]): RuleSet = {
+  def apply[S: Arbitrary : Eq, A: Arbitrary : Eq](optional: Optional[S, A]): RuleSet = {
     val laws: OptionalLaws[S, A] = new OptionalLaws(optional)
     new SimpleRuleSet("Optional",
       "set what you get" -> forAll( (s: S) => laws.getOptionSet(s)),

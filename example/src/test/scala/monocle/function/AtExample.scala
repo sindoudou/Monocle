@@ -1,6 +1,7 @@
 package monocle.function
 
 import monocle.MonocleSuite
+import monocle.interopscalaz._
 import monocle.std._
 import monocle.syntax._
 
@@ -11,12 +12,8 @@ class AtExample extends MonocleSuite {
 
   test("at creates a Lens from a Map, IMap to an optional value") {
     (Map("One" -> 2, "Two" -> 2) applyLens at("Two") get) shouldEqual Some(2)
-
     (Map("One" -> 1, "Two" -> 2) applyLens at("One") set Some(-1))  shouldEqual Map("One" -> -1, "Two" -> 2)
-
     (IMap("One" -> 2, "Two" -> 2) applyLens at("Two") get) shouldEqual Some(2)
-
-    (IMap("One" -> 1, "Two" -> 2) applyLens at("One") set Some(-1))  shouldEqual IMap("One" -> -1, "Two" -> 2)
 
 
     // can delete a value

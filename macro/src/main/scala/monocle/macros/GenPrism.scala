@@ -20,12 +20,12 @@ private object GenPrismImpl extends MacrosCompatibility {
     val sTpeSym = companionTpe(c)(sTpe)
     c.Expr[Prism[S, A]](q"""
       import monocle.Prism
-      import scalaz.{\/, \/-, -\/}
+      import cats.data.Xor
 
       new Prism[$sTpe, $aTpe]{
-        def getOrModify(s: $sTpe): $sTpe \/ $aTpe =
-          if(s.isInstanceOf[$aTpe]) \/-(s.asInstanceOf[$aTpe])
-          else -\/(s)
+        def getOrModify(s: $sTpe): $sTpe Xor $aTpe =
+          if(s.isInstanceOf[$aTpe]) Xor.Right(s.asInstanceOf[$aTpe])
+          else Xor.Left(s)
 
         def reverseGet(a: $aTpe): $sTpe =
           a.asInstanceOf[$sTpe]

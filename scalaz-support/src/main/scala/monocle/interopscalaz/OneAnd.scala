@@ -1,9 +1,10 @@
-package monocle.std
+package monocle.interopscalaz
 
 import monocle.function._
-import monocle.{Lens, Iso, Optional, Traversal}
+import monocle.{Iso, Lens, Traversal}
 
-import scalaz.{Applicative, Maybe, OneAnd}
+import cats.Applicative
+import scalaz.OneAnd
 
 object oneand extends OneAndOptics
 
@@ -12,8 +13,9 @@ trait OneAndOptics {
   implicit def oneAndEach[T[_], A](implicit ev: Each[T[A], A]): Each[OneAnd[T, A], A] =
     new Each[OneAnd[T, A], A]{
       def each = new Traversal[OneAnd[T, A], A]{
-        def modifyF[F[_]: Applicative](f: A => F[A])(s: OneAnd[T, A]): F[OneAnd[T, A]] =
-          Applicative[F].apply2(f(s.head), ev.each.modifyF(f)(s.tail))((head, tail) => new OneAnd(head, tail))
+        def modifyF[F[_]](f: (A) => F[A])(s: OneAnd[T, A])(implicit F: Applicative[F]): F[OneAnd[T, A]] =
+          typeclass.applicative.reverseGet(F)
+            .apply2(f(s.head), ev.each.modifyF(f)(s.tail))((head, tail) => new OneAnd(head, tail))
       }
     }
 

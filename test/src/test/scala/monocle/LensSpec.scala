@@ -1,11 +1,14 @@
 package monocle
 
+import cats.Eq
+import cats.arrow.{Category, Choice, Compose, Split}
+import cats.data.Xor
+import cats.std.int._
+import cats.std.string._
 import monocle.law.discipline.{LensTests, OptionalTests, SetterTests, TraversalTests}
 import monocle.macros.{GenLens, Lenses}
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary._
-
-import scalaz._
 
 case class Point(x: Int, y: Int)
 @Lenses case class Example(s: String, p: Point)
@@ -36,7 +39,7 @@ class LensSpec extends MonocleSuite {
     y <- arbitrary[Int]
   } yield Example(s, Point(x, y)))
 
-  implicit val exampleEq = Equal.equalA[Example]
+  implicit val exampleEq = Eq.fromUniversalEquals[Example]
 
   checkAll("apply Lens", LensTests(_s))
   checkAll("GenLens", LensTests(GenLens[Example](_.s)))
@@ -58,7 +61,7 @@ class LensSpec extends MonocleSuite {
   }
 
   test("Lens has a Choice instance") {
-    Choice[Lens].choice(_x, _y).get(\/-(Point(5, 6))) shouldEqual 6
+    Choice[Lens].choice(_x, _y).get(Xor.right(Point(5, 6))) shouldEqual 6
   }
 
   test("Lens has a Split instance") {

@@ -1,7 +1,9 @@
 package monocle.function
 
+import cats.std.int._
 import monocle.Monocle._
 import monocle._
+import monocle.interopscalaz._
 
 import scalaz.Tree._
 

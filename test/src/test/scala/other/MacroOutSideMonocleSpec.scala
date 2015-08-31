@@ -1,21 +1,18 @@
 package other
 
+import cats.Eq
+import cats.std.all._
 import monocle.MonocleSuite
 import monocle.law.discipline.{IsoTests, LensTests, PrismTests}
 import monocle.macros.{GenIso, GenLens, GenPrism}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 
-import scalaz.Equal
-
 class MacroOutSideMonocleSpec extends MonocleSuite {
 
   case class Example(i: Int)
-
   case object ExampleObject
-
   case class EmptyCase()
-
   case class EmptyCaseType[A]()
 
   sealed trait Foo
@@ -30,13 +27,12 @@ class MacroOutSideMonocleSpec extends MonocleSuite {
   implicit val bar2Arb: Arbitrary[Bar2] = Arbitrary(arbitrary[Int].map(Bar2.apply))
   implicit val fooArb: Arbitrary[Foo] = Arbitrary(Gen.oneOf(arbitrary[Bar1], arbitrary[Bar2]))
 
-  implicit val exampleEq: Equal[Example] = Equal.equalA[Example]
-  implicit val exampleObjEq: Equal[ExampleObject.type] = Equal.equalA[ExampleObject.type]
-  implicit val emptyCaseEq: Equal[EmptyCase] = Equal.equalA[EmptyCase]
-  implicit def emptyCaseTypeEq[A]: Equal[EmptyCaseType[A]] = Equal.equalA[EmptyCaseType[A]]
-  implicit val bar1Eq: Equal[Bar1] = Equal.equalA[Bar1]
-  implicit val fooEq: Equal[Foo] = Equal.equalA[Foo]
-
+  implicit val exampleEq: Eq[Example] = Eq.fromUniversalEquals[Example]
+  implicit val exampleObjEq: Eq[ExampleObject.type] = Eq.fromUniversalEquals[ExampleObject.type]
+  implicit val emptyCaseEq: Eq[EmptyCase] = Eq.fromUniversalEquals[EmptyCase]
+  implicit def emptyCaseTypeEq[A]: Eq[EmptyCaseType[A]] = Eq.fromUniversalEquals[EmptyCaseType[A]]
+  implicit val bar1Eq: Eq[Bar1] = Eq.fromUniversalEquals[Bar1]
+  implicit val fooEq: Eq[Foo] = Eq.fromUniversalEquals[Foo]
 
   checkAll("GenIso"                                       , IsoTests(GenIso[Example, Int]))
   checkAll("GenIso.unit object"                           , IsoTests(GenIso.unit[ExampleObject.type]))

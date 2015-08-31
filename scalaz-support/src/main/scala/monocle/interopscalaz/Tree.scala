@@ -1,11 +1,12 @@
-package monocle.std
+package monocle.interopscalaz
 
 import monocle.function._
+import monocle.std.stream._
 import monocle.{Iso, Lens}
 
-import scalaz.Tree
 import scala.annotation.tailrec
 import scala.collection.immutable.Stream.Empty
+import scalaz.{Traverse, Tree}
 
 
 object tree extends TreeOptics
@@ -48,7 +49,8 @@ trait TreeOptics {
     Lens(_get)(_set)
   }
 
-  implicit def treeEach[A]: Each[Tree[A], A] = Each.traverseEach[Tree, A]
+  implicit def treeEach[A]: Each[Tree[A], A] =
+    Each.traverseEach[Tree, A](typeclass.traverse.get(Traverse[Tree]))
 
   implicit def treeReverse[A]: Reverse[Tree[A], Tree[A]] = new Reverse[Tree[A], Tree[A]] {
     def reverse = Iso[Tree[A], Tree[A]](reverseTree)(reverseTree)

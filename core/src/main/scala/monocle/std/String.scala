@@ -1,12 +1,12 @@
 package monocle.std
 
+import cats.std.list._
+import cats.std.option._
+import cats.syntax.traverse._
 import monocle.function._
 import monocle.{Iso, Prism}
 
-import scalaz.\/
-import scalaz.std.list._
-import scalaz.std.option._
-import scalaz.syntax.traverse._
+import scala.util.Try
 
 object string extends StringOptics
 
@@ -16,7 +16,7 @@ trait StringOptics {
     Iso((_: String).toList)(_.mkString)
 
   val stringToBoolean: Prism[String, Boolean] =
-    Prism{s: String => \/.fromTryCatchNonFatal(s.toBoolean).toOption}(_.toString)
+    Prism{s: String => Try(s.toBoolean).toOption}(_.toString)
 
   val stringToLong: Prism[String, Long] =
     Prism(parseLong)(_.toString)
@@ -80,7 +80,7 @@ trait StringOptics {
     }
 
   private def parseLongUnsigned(s: List[Char]): Option[Long] =
-    s.traverse(charToDigit).map(_.foldl(0L)(n => d => n * 10 + d))
+    s.traverse(charToDigit).map(_.foldLeft(0L)((n, d) => n * 10 + d))
 
   private def charToDigit(c: Char): Option[Int] =
     if (c >= '0' && c <= '9') Some(c - '0')

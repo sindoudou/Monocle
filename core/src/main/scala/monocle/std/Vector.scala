@@ -1,12 +1,10 @@
 package monocle.std
 
-import monocle.function._
-import monocle.{Optional, Prism}
-
 import cats.Id
-import cats.data.Xor
 import cats.std.vector._
 import cats.syntax.traverse._
+import monocle.function._
+import monocle.{Optional, Prism}
 
 object vector extends VectorOptics
 
@@ -20,7 +18,7 @@ trait VectorOptics {
 
   implicit def vectorIndex[A]: Index[Vector[A], Int, A] = new Index[Vector[A], Int, A] {
     def index(i: Int) = Optional[Vector[A], A](
-      v      => if(i < 0) None else Xor.fromTryCatchNonFatal(v.apply(i)).toOption)(
+      v      => if(v.isDefinedAt(i)) Some(v.apply(i)) else None)(
       a => v => v.zipWithIndex.traverse[Id, A]{
         case (_    , index) if index == i => a
         case (value, index)               => value
