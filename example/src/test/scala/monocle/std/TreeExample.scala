@@ -1,6 +1,7 @@
 package monocle.std
 
 import cats.std.int._
+import cats.std.stream._
 import monocle.MonocleSuite
 import monocle.interopscalaz._
 import monocle.syntax._
