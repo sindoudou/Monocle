@@ -3,8 +3,6 @@ package monocle.function
 import cats.std.int._
 import monocle.MonocleSuite
 import monocle.interopscalaz._
-import monocle.std._
-import monocle.syntax._
 
 import scalaz.std.string._
 import scalaz.{IList, IMap}

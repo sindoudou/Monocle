@@ -29,6 +29,11 @@ class FoldSpec extends MonocleSuite {
     listFold.all(_ <= 7)(List(1,2,3))     shouldEqual true
   }
 
+  test("length") {
+    listFold.length(List(1,2,3,4,5)) shouldEqual 5
+    listFold.length(Nil)             shouldEqual 0
+  }
+
   def nestedListFold[A] = Fold.fromFoldable[List, List[A]]
 
   // test implicit resolution of type classes

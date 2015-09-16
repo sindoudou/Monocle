@@ -10,7 +10,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.Equality
 
 import scalaz.\&/.{Both, That, This}
-import scalaz.{IList, IMap, ISet, Maybe, NonEmptyList, OneAnd, Tree, Validation, \&/, \/}
+import scalaz.{Either3, IList, IMap, ISet, Maybe, NonEmptyList, OneAnd, Tree, Validation, \&/, \/}
 
 trait TestInstances {
 
@@ -68,7 +68,8 @@ trait TestInstances {
     typeclass.eq.get(scalaz.IMap.mapEqual(typeclass.eq.reverseGet(K), typeclass.eq.reverseGet(V)))
   implicit def treeEq[A](implicit A: Eq[A]): Eq[scalaz.Tree[A]] =
     typeclass.eq.get(scalaz.Tree.treeEqual(typeclass.eq.reverseGet(A)))
-
+  implicit def either3Eq[A, B, C](implicit A: Eq[A], B: Eq[B], C: Eq[C]): Eq[Either3[A, B, C]] =
+    typeclass.eq.get(scalaz.Either3.equal(typeclass.eq.reverseGet(A), typeclass.eq.reverseGet(B), typeclass.eq.reverseGet(C)))
 
   // Arbitrary instances
 
@@ -143,5 +144,12 @@ trait TestInstances {
 
   implicit def nelArbitrary[A: Arbitrary]: Arbitrary[NonEmptyList[A]] =
     Arbitrary(oneAndArbitrary[List,A].arbitrary.map(o => NonEmptyList(o.head, o.tail:_*)))
+
+  implicit def either3Arbitrary[A: Arbitrary, B: Arbitrary, C: Arbitrary]: Arbitrary[Either3[A, B, C]] =
+    Arbitrary(Gen.oneOf(
+      Arbitrary.arbitrary[A].map(Either3.left3),
+      Arbitrary.arbitrary[B].map(Either3.middle3),
+      Arbitrary.arbitrary[C].map(Either3.right3)
+    ))
 
 }

@@ -3,8 +3,8 @@ package monocle.std
 import cats.Applicative
 import cats.std.list._
 import cats.std.map._
-import cats.syntax.traverse._
 import cats.syntax.functor._
+import cats.syntax.traverse._
 import monocle.function._
 import monocle.{Lens, Prism, Traversal}
 

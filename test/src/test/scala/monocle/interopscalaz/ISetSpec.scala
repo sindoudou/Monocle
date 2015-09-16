@@ -9,8 +9,6 @@ import scalaz.ISet
 import scalaz.std.anyVal._
 
 class ISetSpec extends MonocleSuite {
-
   checkAll("at ISet", AtTests.defaultIntIndex[ISet[Int], Unit])
   checkAll("empty ISet", EmptyTests[ISet[Int]])
-
 }

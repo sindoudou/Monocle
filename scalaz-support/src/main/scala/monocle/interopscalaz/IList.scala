@@ -56,6 +56,6 @@ trait IListOptics {
   }
 
   implicit def iListReverse[A]: Reverse[IList[A], IList[A]] =
-    reverseFromReverseFunction[IList[A]](_.reverse)
+    Reverse.reverseFromReverseFunction[IList[A]](_.reverse)
 
 }

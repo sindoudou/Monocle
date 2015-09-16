@@ -1,8 +1,10 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Snoc1._
 import monocle.function._
 import monocle.law.discipline.internal.Tuple2Eq._
+import monocle.law.discipline.{IsoTests, LensTests}
 import monocle.law.discipline.{IsoTests, LensTests}
 import org.scalacheck.Arbitrary
 import org.typelevel.discipline.Laws
@@ -17,5 +19,4 @@ object Snoc1Tests extends Laws {
       IsoTests(snoc1[S, I, L]).props ++
       LensTests(init[S, I, L]).props ++
       LensTests(last[S, I, L]).props: _*)
-
 }

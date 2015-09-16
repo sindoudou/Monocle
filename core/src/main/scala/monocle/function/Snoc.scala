@@ -1,7 +1,8 @@
 package monocle.function
 
-import monocle.{Optional, Prism}
+import monocle.function.fields._
 import monocle.std.tuple2._
+import monocle.{Optional, Prism}
 
 import scala.annotation.implicitNotFound
 
@@ -9,12 +10,10 @@ import scala.annotation.implicitNotFound
 @implicitNotFound("Could not find an instance of Snoc[${S},${A}], please check Monocle instance location policy to " +
   "find out which import is necessary")
 trait Snoc[S, A] extends Serializable {
-
   def snoc: Prism[S, (S, A)]
 
   def initOption: Optional[S, S] = snoc composeLens first
   def lastOption: Optional[S, A] = snoc composeLens second
-
 }
 
 object Snoc extends SnocFunctions

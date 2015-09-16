@@ -3,12 +3,11 @@ package monocle
 import cats.arrow.{Category, Choice, Compose}
 import cats.data.Xor
 import cats.std.list._
-import monocle.std.list._
 
 class SetterSpec extends MonocleSuite {
 
   def all[A]: Setter[List[A], A] = PSetter.fromFunctor[List, A, A]
-  def even[A]: Setter[List[A], A] = function.filterIndex[List[A], Int, A](_ % 2 == 0).asSetter
+  def even[A]: Setter[List[A], A] = filterIndex[List[A], Int, A](_ % 2 == 0).asSetter
 
   // test implicit resolution of type classes
 
@@ -23,6 +22,5 @@ class SetterSpec extends MonocleSuite {
   test("Setter has a Choice instance") {
     Choice[Setter].choice(all[Int], even[Int]).modify(_ + 1)(Xor.right(List(1,2,3,4))) shouldEqual Xor.right(List(2,2,4,4))
   }
-
 
 }

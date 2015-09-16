@@ -1,6 +1,7 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Reverse._
 import monocle.function._
 import monocle.law.discipline.IsoTests
 import org.scalacheck.{Arbitrary, Prop}

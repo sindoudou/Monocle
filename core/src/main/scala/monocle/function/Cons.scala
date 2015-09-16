@@ -1,5 +1,6 @@
 package monocle.function
 
+import monocle.function.fields._
 import monocle.std.tuple2._
 import monocle.{Optional, Prism}
 
@@ -8,12 +9,10 @@ import scala.annotation.implicitNotFound
 @implicitNotFound("Could not find an instance of Cons[${S},${A}], please check Monocle instance location policy to " +
   "find out which import is necessary")
 trait Cons[S, A] extends Serializable {
- 
   def cons: Prism[S, (A, S)]
 
   def headOption: Optional[S, A] = cons composeLens first
   def tailOption: Optional[S, S] = cons composeLens second
-
 }
 
 object Cons extends ConsFunctions

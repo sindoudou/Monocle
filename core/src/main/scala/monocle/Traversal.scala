@@ -1,10 +1,11 @@
 package monocle
 
 import cats.arrow.Choice
-import cats.{Applicative, Functor, Id, Monoid, Traverse}
 import cats.data.{Const, Xor}
+import cats.std.int._
 import cats.std.list._
-import monocle.internal.{First, Conjunction}
+import cats.{Applicative, Functor, Id, Monoid, Traverse}
+import monocle.internal.{Conjunction, First}
 
 /**
  * A [[PTraversal]] can be seen as a [[POptional]] generalised to 0 to n targets
@@ -77,6 +78,10 @@ abstract class PTraversal[S, T, A, B] extends Serializable { self =>
           s1 => Functor[F].map(other.modifyF(f)(s1))(Xor.right)
         )
     }
+
+  /** calculate the number of targets */
+  final def length(s: S): Int =
+    foldMap(_ => 1)(s)
 
   /****************************************************************/
   /** Compose methods between a [[PTraversal]] and another Optics */

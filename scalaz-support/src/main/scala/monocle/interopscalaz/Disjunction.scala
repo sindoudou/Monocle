@@ -2,9 +2,9 @@ package monocle.interopscalaz
 
 import cats.data.Xor
 import monocle.std.xor
+import monocle.{Iso, PIso, PPrism, Prism}
 
-import scalaz.{Validation, \/-, -\/, \/}
-import monocle.{Iso, PIso, Prism, PPrism}
+import scalaz.{Validation, \/}
 
 object disjunction extends DisjunctionOptics
 

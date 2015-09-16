@@ -4,6 +4,7 @@ import cats.std.list._
 import cats.std.option._
 import cats.syntax.traverse._
 import monocle.function._
+import monocle.std.list._
 import monocle.{Iso, Prism}
 
 import scala.util.Try
@@ -34,7 +35,7 @@ trait StringOptics {
     }
 
   implicit val stringReverse: Reverse[String, String] =
-    reverseFromReverseFunction[String](_.reverse)
+    Reverse.reverseFromReverseFunction[String](_.reverse)
 
   implicit val stringEach: Each[String, Char] =
     new Each[String, Char] {
@@ -80,7 +81,8 @@ trait StringOptics {
     }
 
   private def parseLongUnsigned(s: List[Char]): Option[Long] =
-    s.traverse(charToDigit).map(_.foldLeft(0L)((n, d) => n * 10 + d))
+    if(s.isEmpty) None
+    else s.traverse(charToDigit).map(_.foldLeft(0L)((n, d) => n * 10 + d))
 
   private def charToDigit(c: Char): Option[Int] =
     if (c >= '0' && c <= '9') Some(c - '0')

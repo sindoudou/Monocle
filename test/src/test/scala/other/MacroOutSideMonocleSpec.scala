@@ -40,5 +40,4 @@ class MacroOutSideMonocleSpec extends MonocleSuite {
   checkAll("GenIso.unit empty case class with type param" , IsoTests(GenIso.unit[EmptyCaseType[Int]]))
   checkAll("GenLens"                                      , LensTests(GenLens[Example](_.i)))
   checkAll("GenPrism"                                     , PrismTests(GenPrism[Foo, Bar1]))
-
 }

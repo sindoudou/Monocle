@@ -1,12 +1,9 @@
 package monocle.function
 
 import monocle.MonocleSuite
-import monocle.std._
-import monocle.syntax._
 import monocle.interopscalaz._
 
 import scalaz.OneAnd
-
 
 class HeadExample extends MonocleSuite {
 

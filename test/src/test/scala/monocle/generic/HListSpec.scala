@@ -3,7 +3,6 @@ package monocle.generic
 import cats.Eq
 import cats.std.all._
 import monocle.MonocleSuite
-import monocle.function._
 import monocle.law.discipline.{IsoTests, LensTests}
 import org.scalacheck.Arbitrary
 import shapeless.HList._

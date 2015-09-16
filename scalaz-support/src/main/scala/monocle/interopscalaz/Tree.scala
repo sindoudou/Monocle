@@ -3,11 +3,12 @@ package monocle.interopscalaz
 import monocle.function._
 import monocle.std.stream._
 import monocle.{Iso, Lens}
+import monocle.function.all._
+import monocle.std.stream._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.Stream.Empty
 import scalaz.{Traverse, Tree}
-
 
 object tree extends TreeOptics
 

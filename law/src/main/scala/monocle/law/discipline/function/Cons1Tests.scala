@@ -1,6 +1,7 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Cons1._
 import monocle.function._
 import monocle.law.discipline.internal.Tuple2Eq._
 import monocle.law.discipline.{IsoTests, LensTests}
@@ -17,5 +18,4 @@ object Cons1Tests extends Laws {
       IsoTests(cons1[S, H, T]).props ++
       LensTests(head[S, H, T]).props ++
       LensTests(tail[S, H, T]).props: _*)
-
 }

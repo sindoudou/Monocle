@@ -2,6 +2,7 @@ package monocle.law.discipline.function
 
 import cats.Eq
 import cats.std.unit._
+import monocle.function.Empty._
 import monocle.function._
 import monocle.law.discipline.PrismTests
 import org.scalacheck.{Arbitrary, Prop}

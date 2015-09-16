@@ -1,8 +1,9 @@
 package monocle
 
-import cats.{Applicative, Eq, Monoid}
+import cats.{Applicative, Eq, Monoid, Traverse}
 import cats.arrow.Category
 import cats.data.Xor
+import cats.std.option._
 
 /**
  * A [[PPrism]] can be seen as a pair of functions:
@@ -224,6 +225,9 @@ object PPrism extends PrismInstances {
       def getOption(s: S): Option[A] =
         _getOrModify(s).toOption
     }
+
+  implicit def prismSyntax[S, A](self: Prism[S, A]): PrismSyntax[S, A] =
+    new PrismSyntax(self)
 }
 
 object Prism {
@@ -256,4 +260,11 @@ sealed abstract class PrismInstances {
     def compose[A, B, C](f: Prism[B, C], g: Prism[A, B]): Prism[A, C] =
       g composePrism f
   }
+}
+
+final case class PrismSyntax[S, A](self: Prism[S, A]) extends AnyVal {
+
+  /** lift a [[Prism]] such as it only matches if all elements of `F[S]` are getOrModify */
+  def below[F[_]](implicit F: Traverse[F]): Prism[F[S], F[A]] =
+    Prism[F[S], F[A]](F.traverse(_)(self.getOption))(F.map(_)(self.reverseGet))
 }

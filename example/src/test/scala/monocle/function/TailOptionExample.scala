@@ -2,8 +2,6 @@ package monocle.function
 
 import monocle.MonocleSuite
 import monocle.interopscalaz._
-import monocle.std._
-import monocle.syntax._
 
 import scalaz.IList
 

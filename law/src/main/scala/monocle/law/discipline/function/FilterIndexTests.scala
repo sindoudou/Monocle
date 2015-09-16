@@ -1,11 +1,11 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.FilterIndex._
 import monocle.function._
 import monocle.law.discipline.TraversalTests
 import org.scalacheck.Arbitrary
 import org.typelevel.discipline.Laws
-
 
 object FilterIndexTests extends Laws {
 
@@ -18,6 +18,4 @@ object FilterIndexTests extends Laws {
                                sEq: Eq[S], sArb: Arbitrary[S],
                       evFilterIndex: FilterIndex[S, Int, A]): RuleSet =
     apply[S, Int, A](_ % 2 == 0)
-
-
 }

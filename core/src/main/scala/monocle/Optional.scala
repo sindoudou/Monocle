@@ -28,7 +28,7 @@ import cats.data.Xor
  */
 abstract class POptional[S, T, A, B] extends Serializable { self =>
 
-  /** get the target of a [[POptional]] or modify the source in case there is no target */
+  /** get the target of a [[POptional]] or return the original value while allowing the type to change if it does not match */
   def getOrModify(s: S): T Xor A
 
   /** get the modified source of a [[POptional]] */

@@ -1,6 +1,7 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Each._
 import monocle.function._
 import monocle.law.discipline.TraversalTests
 import org.scalacheck.Arbitrary

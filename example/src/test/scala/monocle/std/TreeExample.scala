@@ -4,8 +4,6 @@ import cats.std.int._
 import cats.std.stream._
 import monocle.MonocleSuite
 import monocle.interopscalaz._
-import monocle.syntax._
-
 import scalaz.Tree._
 
 class TreeExample extends MonocleSuite {

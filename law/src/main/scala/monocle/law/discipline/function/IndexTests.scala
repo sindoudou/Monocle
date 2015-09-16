@@ -1,11 +1,11 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Index._
 import monocle.function._
 import monocle.law.discipline.OptionalTests
 import org.scalacheck.Arbitrary
 import org.typelevel.discipline.Laws
-
 
 object IndexTests extends Laws {
 

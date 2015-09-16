@@ -1,6 +1,7 @@
 package monocle.law.discipline.function
 
 import cats.Eq
+import monocle.function.Cons._
 import monocle.function._
 import monocle.law.discipline.internal.Tuple2Eq._
 import monocle.law.discipline.{OptionalTests, PrismTests}

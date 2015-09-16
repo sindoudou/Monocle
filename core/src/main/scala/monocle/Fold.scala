@@ -1,9 +1,10 @@
 package monocle
 
-import cats.data.Xor
-import cats.{Foldable, Monoid}
-import cats.std.list._
 import cats.arrow.Choice
+import cats.data.Xor
+import cats.std.int._
+import cats.std.list._
+import cats.{Foldable, Monoid}
 import monocle.internal.{Conjunction, First}
 
 /**
@@ -57,6 +58,9 @@ abstract class Fold[S, A] extends Serializable { self =>
       def foldMap[M: Monoid](f: A => M)(s: S Xor S1): M =
         s.fold(self.foldMap(f), other.foldMap(f))
     }
+  /** calculate the number of targets */
+  final def length(s: S): Int =
+    foldMap(_ => 1)(s)
 
   /**********************************************************/
   /** Compose methods between a [[Fold]] and another Optics */

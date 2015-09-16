@@ -58,7 +58,6 @@ lazy val monocle = project.in(file("."))
   .aggregate(core, generic, law, macros, `scalaz-support`, state, test, example, docs, bench)
   .dependsOn(core, generic, law, macros, `scalaz-support`, state, test % "test-internal -> test", bench % "compile-internal;test-internal -> test")
 
-
 lazy val core = project
   .settings(moduleName := "monocle-core")
   .settings(monocleSettings)
@@ -103,7 +102,7 @@ lazy val state = project.dependsOn(core)
   .settings(monocleSettings)
   .settings(libraryDependencies := Seq(scalaz))
 
-lazy val test = project.dependsOn(core, generic, macros, law, `scalaz-support`)
+lazy val test = project.dependsOn(core, generic, macros, law, state, `scalaz-support`)
   .settings(moduleName := "monocle-test")
   .settings(monocleSettings)
   .settings(noPublishSettings)

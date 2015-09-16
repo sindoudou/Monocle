@@ -1,7 +1,10 @@
 package monocle.interopscalaz
 
+object all extends ScalazInteropInstances
+
 trait ScalazInteropInstances
   extends DisjunctionOptics
+  with    Either3Optics
   with    IListOptics
   with    IMapOptics
   with    ISetOptics

@@ -1,6 +1,5 @@
 package monocle.interopscalaz
 
-import cats.std.char._
 import cats.std.int._
 import cats.std.string._
 import monocle.MonocleSuite
