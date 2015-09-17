@@ -116,8 +116,8 @@ lazy val bench = project
   .settings(noPublishSettings)
   .settings(jmhSettings)
   .settings(libraryDependencies ++= Seq(
-    "com.github.julien-truffaut" %%  "monocle-core"  % "1.2.0-SNAPSHOT",
-    "com.github.julien-truffaut" %%  "monocle-macro" % "1.2.0-SNAPSHOT",
+    "com.github.julien-truffaut" %%  "monocle-core"  % "1.2.0-M1",
+    "com.github.julien-truffaut" %%  "monocle-macro" % "1.2.0-M1",
     shapeless,
     compilerPlugin(kindProjector),
     compilerPlugin(paradisePlugin)
