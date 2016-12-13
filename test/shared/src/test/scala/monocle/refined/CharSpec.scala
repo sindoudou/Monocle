@@ -3,25 +3,27 @@ package monocle.refined
 import eu.timepit.refined.api.Refined
 import monocle._
 import monocle.law.discipline.PrismTests
-import monocle.refined.internal.Chars
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.{Arbitrary, Cogen, Gen}
 
 import scalaz.Equal
 
 class CharSpec extends MonocleSuite {
-  val lowerCaseCharacter = 'a'
-
-  implicit val lowerCaseCharArb: Arbitrary[Char] = Arbitrary(
-    Gen.const(lowerCaseCharacter)
-  )
-
   implicit val lowerCaseRefinedCharArb: Arbitrary[LowerCaseChar] = Arbitrary(
-    Gen.const(Refined.unsafeApply(lowerCaseCharacter))
+    Gen.alphaLowerChar.map(Refined.unsafeApply)
   )
 
-  implicit val eqA: Equal[LowerCaseChar] = Equal.equalA[LowerCaseChar]
-  implicit val eqS: Equal[Char] = Equal.equalA[Char]
+  implicit val upperCaseRefinedCharArb: Arbitrary[UpperCaseChar] = Arbitrary(
+    Gen.alphaUpperChar.map(Refined.unsafeApply)
+  )
 
+  implicit val lowerCaseCoGen: Cogen[LowerCaseChar] = Cogen[Char].contramap[LowerCaseChar](_.get)
+  implicit val upperCaseCoGen: Cogen[UpperCaseChar] = Cogen[Char].contramap[UpperCaseChar](_.get)
 
-  checkAll("lower cases", PrismTests(toCase[LowerCaseChar](Chars.lowerCaseChar)))
+  implicit val eqLowerCase: Equal[LowerCaseChar] = Equal.equalA[LowerCaseChar]
+  implicit val eqUpperCase: Equal[UpperCaseChar] = Equal.equalA[UpperCaseChar]
+  implicit val eqChar: Equal[Char] = Equal.equalA[Char]
+
+  checkAll("lower cases", PrismTests(lowerCase))
+  checkAll("upper cases", PrismTests(upperCase))
+
 }
